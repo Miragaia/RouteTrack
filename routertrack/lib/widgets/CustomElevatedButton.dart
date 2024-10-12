@@ -2,70 +2,57 @@ import 'package:flutter/material.dart';
 import 'BaseButton.dart';
 import 'package:routertrack/theme/CustomTextStyles.dart';
 
-class CustomElevatedButton extends BaseButton {
+class CustomElevatedButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final ButtonStyle? buttonStyle;
+  final Widget? leftIcon;
+  final Widget? rightIcon;
+  final TextStyle? buttonTextStyle;
+  final double? height;
+  final double? width;
+  final EdgeInsetsGeometry? margin;
+  final Decoration? decoration;
+  final bool? isDisabled;
+
   CustomElevatedButton({
-    Key? key,
-    this.decoration,
+    required this.text,
+    this.onPressed,
+    this.buttonStyle,
     this.leftIcon,
     this.rightIcon,
-    EdgeInsets? margin,
-    VoidCallback? onPressed,
-    ButtonStyle? buttonStyle,
-    Alignment? alignment,
-    TextStyle? buttonTextStyle,
-    bool? isDisabled,
-    double? height,
-    double? width,
-    required String text,
-  }) : super(
-          text: text,
-          onPressed: onPressed,
-          buttonStyle: buttonStyle,
-          isDisabled: isDisabled,
-          buttonTextStyle: buttonTextStyle,
-          height: height,
-          width: width,
-          alignment: alignment,
-          margin: margin,
-        );
-
-  final BoxDecoration? decoration;
-
-  final Widget? leftIcon;
-
-  final Widget? rightIcon;
+    this.buttonTextStyle,
+    this.height,
+    this.width,
+    this.margin,
+    this.decoration,
+    this.isDisabled,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return alignment != null
-        ? Align(
-            alignment: alignment ?? Alignment.center,
-            child: buildElevatedButtonWidget,
-          )
-        : buildElevatedButtonWidget;
-  }
-
-  Widget get buildElevatedButtonWidget => Container(
-        height: this.height ?? 54.0,
-        width: this.width ?? double.maxFinite,
-        margin: margin,
-        decoration: decoration,
-        child: ElevatedButton(
-          style: buttonStyle,
-          onPressed: isDisabled ?? false ? null : onPressed ?? () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              leftIcon ?? const SizedBox.shrink(),
-              Text(
-                text,
-                style: buttonTextStyle ??
-                    CustomTextStyles.titleMediumOnPrimaryContainerMedium as TextStyle?,
-              ),
-              rightIcon ?? const SizedBox.shrink(),
-            ],
-          ),
+    return Container(
+      height: height ?? 54.0,
+      width: width ?? double.maxFinite,
+      margin: margin,
+      decoration: decoration,
+      child: ElevatedButton(
+        style: buttonStyle,
+        onPressed: isDisabled ?? false ? null : onPressed ?? () {},
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            leftIcon ?? const SizedBox.shrink(),
+            Text(
+              text,
+              style: buttonTextStyle ??
+                  CustomTextStyles.titleMediumOnPrimaryContainerMedium(context),
+            ),
+            rightIcon ?? const SizedBox.shrink(),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
