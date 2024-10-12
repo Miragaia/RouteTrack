@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:routertrack/screens/home.dart';
 import 'package:routertrack/screens/logIn.dart';
-// import 'package:routertrack/screens/signUp.dart';
+import 'package:routertrack/screens/signup.dart';
 import 'package:routertrack/screens/splash.dart';
 
 
@@ -17,7 +17,7 @@ class AppRoutes {
   static Map<String, WidgetBuilder> routes = {
     splashScreen: (context) => const SplashScreen(),
     logInScreen: (context) => const LogInScreen(),
-    // signUpScreen: (context) => SignUpScreen(),
+    signUpScreen: (context) => const SignUpScreen(),
     // homePage: (context) => HomePage(),
   };
 }

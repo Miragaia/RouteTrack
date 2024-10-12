@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:routertrack/firebase_ath/firebase_auth_services.dart';
+import 'package:routertrack/routes.dart';
 import 'package:routertrack/screens/home.dart';
 import 'package:routertrack/theme/CustomTextStyles.dart';
 import 'package:routertrack/widgets/CustomElevatedButton.dart';
@@ -64,7 +65,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         width: 250,
                         margin: const EdgeInsets.only(left: 10, right: 75),
                         child: Text(
-                          "Fill your details or continue with Gmail/Face Recognition",
+                          "Fill your details to continue",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -176,7 +177,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     const SizedBox(height: 26),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/signUpScreen');
+                        Navigator.pushNamed(context, AppRoutes.signUpScreen);
                       },
                       child: RichText(
                         text: TextSpan(
