@@ -30,7 +30,7 @@ class SplashScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                "FindMe",
+                "RouteTrack",
                 style: theme.textTheme.displaySmall,
               ),
               const SizedBox(height: 48),
