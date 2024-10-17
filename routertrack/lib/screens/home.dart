@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:routertrack/widgets/stores_map.dart';
+import 'package:routertrack/screens/map.dart';
+import 'package:routertrack/widgets/stores_map.dart'; // Assuming StoresMap is your map screen
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,30 +21,41 @@ class HomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(24.0), // Increase padding
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.add_circle_outline,
-                              size: 100, // Bigger icon
-                              color: Colors.blue,
-                            ),
-                            SizedBox(height: 20), // More spacing between icon and text
-                            Text(
-                              'CREATE TRIP',
-                              style: TextStyle(
-                                fontSize: 26, // Bigger text
-                                fontWeight: FontWeight.bold,
+                    child: InkWell(
+                      onTap: () {
+                        // Navigate to StoresMap page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MapScreen(),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(24.0), // Increase padding
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.add_circle_outline,
+                                size: 100, // Bigger icon
+                                color: Colors.blue,
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 20), // More spacing between icon and text
+                              Text(
+                                'CREATE TRIP',
+                                style: TextStyle(
+                                  fontSize: 26, // Bigger text
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
