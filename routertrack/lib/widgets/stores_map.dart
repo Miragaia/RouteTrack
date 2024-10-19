@@ -98,7 +98,6 @@ class _RoutesMapState extends State<RoutesMap> {
     return BlocListener<SearchLocationBloc, LatLng>(
       listener: (context, state) {
         print("callbacking this $state");
-        GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: apiKey);
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
           bearing: 0,
           target: state,
