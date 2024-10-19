@@ -2,18 +2,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:routertrack/widgets/modal_bottom_sheet.dart';
 
 
-class StoresMap extends StatefulWidget{
-  const StoresMap({
+class RoutesMap extends StatefulWidget{
+  const RoutesMap({
     super.key,
   });
 
   @override
-  State<StoresMap> createState() => _StoresMapState();
+  State<RoutesMap> createState() => _RoutesMapState();
 }
 
-class _StoresMapState extends State<StoresMap> {
+class _RoutesMapState extends State<RoutesMap> {
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   late GoogleMapController _googleMapController;
   final ClusterManagerId clusterManagerId = const ClusterManagerId("stores");
@@ -125,8 +126,22 @@ class _StoresMapState extends State<StoresMap> {
                   ),
                 ),
                 Positioned(
-                    right: 10,
-                    bottom: 10,
+                  left: 12,
+                  top: 40,
+                  child: IconButton.filledTonal(
+                      padding: const EdgeInsets.only(right: 3),
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.7),
+                      )
+                  ),
+                ),
+                Positioned(
+                    right: 15,
+                    bottom: 100,
                     child: IconButton.filled(
                       onPressed: () {
                         if (snapshot.hasData){
@@ -143,10 +158,10 @@ class _StoresMapState extends State<StoresMap> {
                         size: 20,
                       ),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: Colors.white.withOpacity(0.7),
                       ),
                     )
-                )
+                ),
               ]
           );
         }
