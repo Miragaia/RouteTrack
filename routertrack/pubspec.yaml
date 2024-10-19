@@ -39,6 +39,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.3.0
   flutter_svg: ^2.0.9
+  google_places_flutter: ^2.0.9
+  flutter_bloc: ^8.1.6
 
 dev_dependencies:
   flutter_test:

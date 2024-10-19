@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
+import '../bloc/search_location_bloc.dart';
 import 'CustomElevatedButton.dart';
-import 'CustomTextFormField.dart';
-import 'package:google_maps_webservice/places.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
 
 class RouteBottomSheet extends StatefulWidget {
   const RouteBottomSheet({super.key});
@@ -15,6 +17,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
   final TextEditingController searchAddressController = TextEditingController();
   final FocusNode _searchAddressFocusNode = FocusNode();
   final DraggableScrollableController _draggableScrollableSheetController = DraggableScrollableController();
+  late SearchLocationBloc searchLocationBloc;
 
   @override
   void initState() {
@@ -26,6 +29,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
         curve: Curves.easeInOut,
       );
     });
+    searchLocationBloc = BlocProvider.of<SearchLocationBloc>(context);
   }
 
 
@@ -47,16 +51,68 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
             child: IntrinsicHeight(
               child: Column(
                 children: [
-                  CustomTextFormField(
-                    onChanged: _handlePressButton,
-                    controller: searchAddressController,
-                    focusNode: _searchAddressFocusNode,
-                    hintText: "Add Address",
-                    textInputType: TextInputType.emailAddress,
-                    prefix: const Icon(Icons.location_on_outlined),
-                    suffix: const Icon(Icons.visibility_outlined),
-                    autofocus: false,
+                  // CustomTextFormField(
+                  //   onChanged: _handlePressButton,
+                  //   controller: searchAddressController,
+                  //   focusNode: _searchAddressFocusNode,
+                  //   hintText: "Add Address",
+                  //   textInputType: TextInputType.emailAddress,
+                  //   prefix: const Icon(Icons.location_on_outlined),
+                  //   suffix: const Icon(Icons.visibility_outlined),
+                  //   autofocus: false,
+                  // ),
+
+                  GooglePlaceAutoCompleteTextField(
+                    textEditingController: searchAddressController,
+                    googleAPIKey:"AIzaSyBSGX8IRUDf0JIDgg2ShwvFMEX-Kn9cbbA",
+                    inputDecoration: InputDecoration(
+                      hintText: "Search your location",
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                    ),
+                    debounceTime: 400,
+                    countries: ["pt"],
+                    isLatLngRequired: true,
+                    getPlaceDetailWithLatLng: (Prediction prediction) {
+                      print("inserting event");
+                      print("inserting event");
+                      searchLocationBloc.add(SearchLocationEvent(LatLng(
+                          double.parse(prediction.lat.toString()), double.parse(prediction.lng.toString())
+                      )));
+                      print("inserted event");
+                      print("inserted event");
+                    },
+
+                    itemClick: (Prediction prediction) {
+                      searchAddressController.text = prediction.description ?? "";
+                      searchAddressController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: prediction.description?.length ?? 0));
+                    },
+                    seperatedBuilder: Divider(),
+                    containerHorizontalPadding: 10,
+
+
+                    // OPTIONAL// If you want to customize list view item builder
+                    itemBuilder: (context, index, Prediction prediction) {
+                      return Container(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Icon(Icons.location_on),
+                            SizedBox(
+                              width: 7,
+                            ),
+                            Expanded(child: Text("${prediction.description ?? ""}"))
+                          ],
+                        ),
+                      );
+                    },
+
+                    isCrossBtnShown: true,
+
+                    // default 600 ms ,
                   ),
+
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -113,31 +169,5 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
         );
       }
     );
-  }
-
-
-  Future<void> _handlePressButton(String content) async {
-    // show input autocomplete with selected mode
-    // then get the Prediction selected
-    const API_KEY = "AIzaSyBSGX8IRUDf0JIDgg2ShwvFMEX-Kn9cbbA";
-    Prediction? p = await PlacesAutocomplete.show(
-        context: context,
-        apiKey: API_KEY,
-        mode: Mode.fullscreen, // Mode.overlay
-        language: "en",
-        components: [Component(Component.country, "pk")]);
-
-
-
-    if (p != null) {
-      GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: API_KEY);
-      String placeId = p.placeId ?? "";
-      PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(placeId);
-      final lat = detail.result.geometry?.location.lat;
-      final lng = detail.result.geometry?.location.lng;
-      print("lat $lat, lng $lng");
-    }
-
-
   }
 }
