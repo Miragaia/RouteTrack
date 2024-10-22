@@ -40,6 +40,8 @@ dependencies:
   cached_network_image: ^3.3.0
   flutter_svg: ^2.0.9
   flutter_blue_plus: ^1.33.5
+  google_places_flutter: ^2.0.9
+  flutter_bloc: ^8.1.6
 
 dev_dependencies:
   flutter_test:
