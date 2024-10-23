@@ -14,11 +14,11 @@ class MapScreen extends StatelessWidget {
     return SafeArea(
       child: BlocProvider(
         create: (context) => SearchLocationBloc(const LatLng(0, 0)),
-        child: Scaffold(
+        child: const Scaffold(
           body: Center(
-            child: const RoutesMap(),
+            child: RoutesMap(),
           ),
-          bottomSheet: const RouteBottomSheet(),
+          bottomSheet: RouteBottomSheet(),
         ),
       ),
     );
