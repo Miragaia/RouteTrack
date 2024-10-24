@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:routertrack/bloc/route_cart/route_cart_bloc.dart';
+import 'package:routertrack/bloc/route_cart/route_cart_events.dart';
+import 'package:routertrack/database/database.dart';
 
 class StepperTimeline extends StatefulWidget {
   const StepperTimeline({super.key});
@@ -33,6 +37,15 @@ class _StepperTimelineState extends State<StepperTimeline> {
       currentStep: _index,
       type: StepperType.vertical, // Make it vertical like a timeline
       onStepTapped: (int index) {
+        print("added point of interest");
+        BlocProvider.of<RouteCartBloc>(context).add(RouteCartPointOfInterestAdded(
+            pointsOfInterest: PointsOfInterest(
+                id: 1,
+                name: "name",
+                latitude: 12.0,
+                longitude: 12.0
+            )
+        ));
         setState(() {
           _index = index;
         });

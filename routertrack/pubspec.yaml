@@ -46,6 +46,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   drift: ^2.21.0
   drift_flutter: ^0.2.1
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

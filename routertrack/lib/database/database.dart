@@ -17,7 +17,45 @@ class TodoCategory extends Table {
   TextColumn get description => text()();
 }
 
-@DriftDatabase(tables: [TodoItems, TodoCategory])
+
+class PointsOfInterests extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 6, max: 32)();
+  RealColumn get latitude => real()();
+  RealColumn get longitude => real()();
+}
+
+class Routes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 6, max: 32)();
+  DateTimeColumn get creationDate => dateTime().withDefault(Constant(DateTime.now()))();
+}
+
+class PointsOfInterestRoutesEntries extends Table {
+  // PointsOfInterest -- MxN -- Routes
+  IntColumn get pointOfInterestId => integer().references(PointsOfInterests, #id)();
+  IntColumn get routeId => integer().references(Routes, #id)();
+}
+
+class Trips extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 6, max: 32)();
+  DateTimeColumn get creationDate => dateTime().withDefault(Constant(DateTime.now()))();
+  // Foreign Keys
+  // Route -- 1xN -- Trips
+  // User -- 1xN -- Trips
+  IntColumn get routeId => integer().references(Routes, #id)();
+  IntColumn get userId => integer().references(Users, #id)();
+}
+
+class Users extends Table {
+  IntColumn get id => integer().autoIncrement()();
+}
+
+
+@DriftDatabase(
+  tables: [PointsOfInterests, Routes, PointsOfInterestRoutesEntries, Trips, Users, TodoItems, TodoCategory],
+)
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a schemaVersion getter
   // and a constructor telling drift where the database should be stored.
@@ -32,4 +70,14 @@ class AppDatabase extends _$AppDatabase {
     // getApplicationDocumentsDirectory().
     return driftDatabase(name: 'my_database');
   }
+
+  Stream<List<Trip>> usersTrips(Users user) {
+    return (
+        select(trips)
+          ..where((trip) => trip.userId.equals(user.id as int))
+    ).watch();
+  }
+
+
 }
+
