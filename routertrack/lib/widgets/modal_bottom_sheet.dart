@@ -4,7 +4,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
+import '../bloc/route_cart/route_cart_bloc.dart';
+import '../bloc/route_cart/route_cart_events.dart';
 import '../bloc/search_location_bloc.dart';
+import '../database/database.dart';
 import 'CustomElevatedButton.dart';
 
 class RouteBottomSheet extends StatefulWidget {
@@ -19,6 +22,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
   final FocusNode _searchAddressFocusNode = FocusNode();
   final DraggableScrollableController _draggableScrollableSheetController = DraggableScrollableController();
   late SearchLocationBloc searchLocationBloc;
+  List<bool> _selectedTransports = [true, false, false];
 
   @override
   void initState() {
@@ -36,6 +40,8 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final RouteCartBloc _routeCartBloc = BlocProvider.of<RouteCartBloc>(context);
+
     return DraggableScrollableSheet(
       controller: _draggableScrollableSheetController,
       snap: true,
@@ -58,6 +64,37 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                     hintText: "Search your location",
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 15),
+                    icon: Icon(Icons.search),
+                    suffixIcon: SizedBox(
+                      width: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.my_location_outlined),
+                            onPressed: () {
+
+                              _routeCartBloc.add(RouteCartPointOfInterestAdded(
+                                  pointsOfInterest: PointsOfInterest(
+                                      id: 1,
+                                      name: "name",
+                                      latitude: 12.0,
+                                      longitude: 12.0
+                                  )
+                              ));
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.qr_code),
+                            onPressed: () {
+
+                            },
+                          ),
+
+                        ],
+                      ),
+                    )
                   ),
                   debounceTime: 400,
                   countries: ["pt"],
@@ -105,12 +142,27 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(Icons.directions_car_filled_sharp, color: Colors.black, size: 40),
-                    SizedBox(width: 10),
-                    Icon(Icons.directions_bike_outlined, color: Colors.black, size: 40),
-                    SizedBox(width: 10),
-                    Icon(Icons.directions_walk_outlined, color: Colors.black, size: 40),
-                    Spacer(),
+                    ToggleButtons(
+                      onPressed: (int index) {
+                        setState(() {
+                          for (int i = 0; i < _selectedTransports.length; i++) {
+                            _selectedTransports[i] = i == index;
+                          }
+                        });
+                      },
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      selectedBorderColor: Colors.blue[700],
+                      selectedColor: Colors.white,
+                      fillColor: Colors.blue[200],
+                      color: Colors.blue[400],
+                      isSelected: _selectedTransports,
+                      children: [
+                        Icon(Icons.directions_car_filled_sharp, color: Colors.black),
+                        Icon(Icons.directions_bike_outlined, color: Colors.black),
+                        Icon(Icons.directions_walk_outlined, color: Colors.black),
+                      ],
+                    ),
+                    const Spacer(),
                     ElevatedButton.icon(
                       onPressed: () {},
                       icon: const Icon(Icons.delete_rounded),
@@ -121,41 +173,6 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                 ),
 
                 const StepperTimeline(),
-
-
-
-                // Row(
-                //   children: [
-                //     IconButton(
-                //         onPressed: () {print("CLiCKE");},
-                //         icon: Icon(Icons.home, color: Colors.black, size: 40,)
-                //     ),
-                //     SizedBox(width: 10),
-                //     Text("HOME", style: TextStyle(fontSize: 20, color: Colors.black45),),
-                //   ],
-                // ),
-                //
-                // Row(
-                //   children: [
-                //     IconButton(
-                //         onPressed: () {print("CLiCKE");},
-                //         icon: Icon(Icons.location_on_sharp, color: Colors.black, size: 40,
-                //         )),
-                //     SizedBox(width: 10),
-                //     Text("Final Destination", style: TextStyle(fontSize: 20, color: Colors.black45),),
-                //   ],
-                // ),
-                //
-                // Text("ce"),Text("ce"),Text("ce"),Text("ce"),Text("ce"),Text("ce"),Text("ce"),Text("ce"),
-                //
-                // Spacer(),
-                // CustomElevatedButton(
-                //   text: "Create",
-                //   onPressed: () {
-                //
-                //   },
-                // ),
-
               ],
             ),
           ),

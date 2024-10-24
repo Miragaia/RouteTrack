@@ -19,6 +19,14 @@ final class RouteCartPointOfInterestAdded extends RouteCartEvent {
   List<Object?> get props => [pointsOfInterest];
 }
 
+final class RouteCartPointOfInterestRepeated extends RouteCartEvent {
+  RouteCartPointOfInterestRepeated({required this.pointsOfInterest});
+  final PointsOfInterest pointsOfInterest;
+
+  @override
+  List<Object?> get props => [pointsOfInterest];
+}
+
 final class RouteCartPointOfInterestRemoved extends RouteCartEvent {
   RouteCartPointOfInterestRemoved({required this.pointsOfInterestEntry});
   final PointsOfInterestEntry pointsOfInterestEntry;

@@ -22,6 +22,16 @@ class RouteRepository {
       PointsOfInterest origin,
       PointsOfInterest destination,
   ) {
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
+    print("constructor");
     pointsOfInterestLinkedList.add(PointsOfInterestEntry(origin));
     pointsOfInterestLinkedList.add(PointsOfInterestEntry(destination));
   }
