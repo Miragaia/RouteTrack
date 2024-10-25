@@ -32,4 +32,5 @@ final class RouteEntryClear extends RouteEvent {
   List<Object?> get props => [];
 }
 
+final class RoutePersisted extends RouteEvent {}
 

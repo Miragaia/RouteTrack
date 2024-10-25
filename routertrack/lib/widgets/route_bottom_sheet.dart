@@ -94,8 +94,8 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                     onPressed: () {
                                       _routeCreationBloc.add(RouteEntryAdded(
                                           routeItem: RouteItemDTO(
-                                            name: "name",
-                                            country: "Portugal",
+                                            title: "name",
+                                            description: "Portugal",
                                             latitude: 1,
                                             longitude: 2,
                                           )
@@ -121,8 +121,8 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                             String country = prediction.description ?? "";
                             _routeCreationBloc.add(RouteEntryAdded(
                                 routeItem: RouteItemDTO(
-                                  name: name,
-                                  country: country,
+                                  title: name,
+                                  description: country,
                                   latitude: double.parse(prediction.lat.toString()),
                                   longitude: double.parse(prediction.lng.toString()),
                                 )
@@ -220,7 +220,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
               child: CustomElevatedButton(
                 text: "Optimize",
                 onPressed: () {
-
+                  _routeCreationBloc.add(RoutePersisted());
                 },
               ),
             ),

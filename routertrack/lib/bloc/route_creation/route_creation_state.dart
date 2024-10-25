@@ -24,3 +24,7 @@ final class RouteStateRepeated extends RouteState {
 final class RouteStateCleared extends RouteState {
   const RouteStateCleared(super.pointsOfInterestLinkedList);
 }
+
+final class RouteStatePersisted extends RouteState {
+  const RouteStatePersisted(super.pointsOfInterestLinkedList);
+}

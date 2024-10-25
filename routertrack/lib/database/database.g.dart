@@ -18,12 +18,19 @@ class $PointsOfInterestsTable extends PointsOfInterests
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 6, maxTextLength: 32),
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 128),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
   static const VerificationMeta _latitudeMeta =
@@ -39,7 +46,8 @@ class $PointsOfInterestsTable extends PointsOfInterests
       'longitude', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, latitude, longitude];
+  List<GeneratedColumn> get $columns =>
+      [id, title, description, latitude, longitude];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -53,11 +61,19 @@ class $PointsOfInterestsTable extends PointsOfInterests
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('name')) {
+    if (data.containsKey('title')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     } else if (isInserting) {
-      context.missing(_nameMeta);
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
     }
     if (data.containsKey('latitude')) {
       context.handle(_latitudeMeta,
@@ -82,8 +98,10 @@ class $PointsOfInterestsTable extends PointsOfInterests
     return PointsOfInterest(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
       latitude: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}latitude'])!,
       longitude: attachedDatabase.typeMapping
@@ -100,19 +118,22 @@ class $PointsOfInterestsTable extends PointsOfInterests
 class PointsOfInterest extends DataClass
     implements Insertable<PointsOfInterest> {
   final int id;
-  final String name;
+  final String title;
+  final String description;
   final double latitude;
   final double longitude;
   const PointsOfInterest(
       {required this.id,
-      required this.name,
+      required this.title,
+      required this.description,
       required this.latitude,
       required this.longitude});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
+    map['title'] = Variable<String>(title);
+    map['description'] = Variable<String>(description);
     map['latitude'] = Variable<double>(latitude);
     map['longitude'] = Variable<double>(longitude);
     return map;
@@ -121,7 +142,8 @@ class PointsOfInterest extends DataClass
   PointsOfInterestsCompanion toCompanion(bool nullToAbsent) {
     return PointsOfInterestsCompanion(
       id: Value(id),
-      name: Value(name),
+      title: Value(title),
+      description: Value(description),
       latitude: Value(latitude),
       longitude: Value(longitude),
     );
@@ -132,7 +154,8 @@ class PointsOfInterest extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PointsOfInterest(
       id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String>(json['description']),
       latitude: serializer.fromJson<double>(json['latitude']),
       longitude: serializer.fromJson<double>(json['longitude']),
     );
@@ -142,24 +165,32 @@ class PointsOfInterest extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String>(description),
       'latitude': serializer.toJson<double>(latitude),
       'longitude': serializer.toJson<double>(longitude),
     };
   }
 
   PointsOfInterest copyWith(
-          {int? id, String? name, double? latitude, double? longitude}) =>
+          {int? id,
+          String? title,
+          String? description,
+          double? latitude,
+          double? longitude}) =>
       PointsOfInterest(
         id: id ?? this.id,
-        name: name ?? this.name,
+        title: title ?? this.title,
+        description: description ?? this.description,
         latitude: latitude ?? this.latitude,
         longitude: longitude ?? this.longitude,
       );
   PointsOfInterest copyWithCompanion(PointsOfInterestsCompanion data) {
     return PointsOfInterest(
       id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
+      title: data.title.present ? data.title.value : this.title,
+      description:
+          data.description.present ? data.description.value : this.description,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
     );
@@ -169,7 +200,8 @@ class PointsOfInterest extends DataClass
   String toString() {
     return (StringBuffer('PointsOfInterest(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude')
           ..write(')'))
@@ -177,45 +209,52 @@ class PointsOfInterest extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, name, latitude, longitude);
+  int get hashCode => Object.hash(id, title, description, latitude, longitude);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PointsOfInterest &&
           other.id == this.id &&
-          other.name == this.name &&
+          other.title == this.title &&
+          other.description == this.description &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude);
 }
 
 class PointsOfInterestsCompanion extends UpdateCompanion<PointsOfInterest> {
   final Value<int> id;
-  final Value<String> name;
+  final Value<String> title;
+  final Value<String> description;
   final Value<double> latitude;
   final Value<double> longitude;
   const PointsOfInterestsCompanion({
     this.id = const Value.absent(),
-    this.name = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
   });
   PointsOfInterestsCompanion.insert({
     this.id = const Value.absent(),
-    required String name,
+    required String title,
+    required String description,
     required double latitude,
     required double longitude,
-  })  : name = Value(name),
+  })  : title = Value(title),
+        description = Value(description),
         latitude = Value(latitude),
         longitude = Value(longitude);
   static Insertable<PointsOfInterest> custom({
     Expression<int>? id,
-    Expression<String>? name,
+    Expression<String>? title,
+    Expression<String>? description,
     Expression<double>? latitude,
     Expression<double>? longitude,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (name != null) 'name': name,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
     });
@@ -223,12 +262,14 @@ class PointsOfInterestsCompanion extends UpdateCompanion<PointsOfInterest> {
 
   PointsOfInterestsCompanion copyWith(
       {Value<int>? id,
-      Value<String>? name,
+      Value<String>? title,
+      Value<String>? description,
       Value<double>? latitude,
       Value<double>? longitude}) {
     return PointsOfInterestsCompanion(
       id: id ?? this.id,
-      name: name ?? this.name,
+      title: title ?? this.title,
+      description: description ?? this.description,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
     );
@@ -240,8 +281,11 @@ class PointsOfInterestsCompanion extends UpdateCompanion<PointsOfInterest> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
     }
     if (latitude.present) {
       map['latitude'] = Variable<double>(latitude.value);
@@ -256,7 +300,8 @@ class PointsOfInterestsCompanion extends UpdateCompanion<PointsOfInterest> {
   String toString() {
     return (StringBuffer('PointsOfInterestsCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude')
           ..write(')'))
@@ -278,14 +323,6 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 6, maxTextLength: 32),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
   static const VerificationMeta _creationDateMeta =
       const VerificationMeta('creationDate');
   @override
@@ -295,7 +332,7 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
       requiredDuringInsert: false,
       defaultValue: Constant(DateTime.now()));
   @override
-  List<GeneratedColumn> get $columns => [id, name, creationDate];
+  List<GeneratedColumn> get $columns => [id, creationDate];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -308,12 +345,6 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
     }
     if (data.containsKey('creation_date')) {
       context.handle(
@@ -332,8 +363,6 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
     return Route(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       creationDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}creation_date'])!,
     );
@@ -347,15 +376,12 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
 
 class Route extends DataClass implements Insertable<Route> {
   final int id;
-  final String name;
   final DateTime creationDate;
-  const Route(
-      {required this.id, required this.name, required this.creationDate});
+  const Route({required this.id, required this.creationDate});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
     map['creation_date'] = Variable<DateTime>(creationDate);
     return map;
   }
@@ -363,7 +389,6 @@ class Route extends DataClass implements Insertable<Route> {
   RoutesCompanion toCompanion(bool nullToAbsent) {
     return RoutesCompanion(
       id: Value(id),
-      name: Value(name),
       creationDate: Value(creationDate),
     );
   }
@@ -373,7 +398,6 @@ class Route extends DataClass implements Insertable<Route> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Route(
       id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
       creationDate: serializer.fromJson<DateTime>(json['creationDate']),
     );
   }
@@ -382,20 +406,17 @@ class Route extends DataClass implements Insertable<Route> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
       'creationDate': serializer.toJson<DateTime>(creationDate),
     };
   }
 
-  Route copyWith({int? id, String? name, DateTime? creationDate}) => Route(
+  Route copyWith({int? id, DateTime? creationDate}) => Route(
         id: id ?? this.id,
-        name: name ?? this.name,
         creationDate: creationDate ?? this.creationDate,
       );
   Route copyWithCompanion(RoutesCompanion data) {
     return Route(
       id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
       creationDate: data.creationDate.present
           ? data.creationDate.value
           : this.creationDate,
@@ -406,54 +427,45 @@ class Route extends DataClass implements Insertable<Route> {
   String toString() {
     return (StringBuffer('Route(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('creationDate: $creationDate')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, creationDate);
+  int get hashCode => Object.hash(id, creationDate);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Route &&
           other.id == this.id &&
-          other.name == this.name &&
           other.creationDate == this.creationDate);
 }
 
 class RoutesCompanion extends UpdateCompanion<Route> {
   final Value<int> id;
-  final Value<String> name;
   final Value<DateTime> creationDate;
   const RoutesCompanion({
     this.id = const Value.absent(),
-    this.name = const Value.absent(),
     this.creationDate = const Value.absent(),
   });
   RoutesCompanion.insert({
     this.id = const Value.absent(),
-    required String name,
     this.creationDate = const Value.absent(),
-  }) : name = Value(name);
+  });
   static Insertable<Route> custom({
     Expression<int>? id,
-    Expression<String>? name,
     Expression<DateTime>? creationDate,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (name != null) 'name': name,
       if (creationDate != null) 'creation_date': creationDate,
     });
   }
 
-  RoutesCompanion copyWith(
-      {Value<int>? id, Value<String>? name, Value<DateTime>? creationDate}) {
+  RoutesCompanion copyWith({Value<int>? id, Value<DateTime>? creationDate}) {
     return RoutesCompanion(
       id: id ?? this.id,
-      name: name ?? this.name,
       creationDate: creationDate ?? this.creationDate,
     );
   }
@@ -463,9 +475,6 @@ class RoutesCompanion extends UpdateCompanion<Route> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
     }
     if (creationDate.present) {
       map['creation_date'] = Variable<DateTime>(creationDate.value);
@@ -477,7 +486,6 @@ class RoutesCompanion extends UpdateCompanion<Route> {
   String toString() {
     return (StringBuffer('RoutesCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('creationDate: $creationDate')
           ..write(')'))
         .toString();
@@ -854,14 +862,6 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 6, maxTextLength: 32),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
   static const VerificationMeta _creationDateMeta =
       const VerificationMeta('creationDate');
   @override
@@ -888,8 +888,7 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES users (id)'));
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, creationDate, routeId, userId];
+  List<GeneratedColumn> get $columns => [id, creationDate, routeId, userId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -902,12 +901,6 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
     }
     if (data.containsKey('creation_date')) {
       context.handle(
@@ -938,8 +931,6 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
     return Trip(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       creationDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}creation_date'])!,
       routeId: attachedDatabase.typeMapping
@@ -957,13 +948,11 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
 
 class Trip extends DataClass implements Insertable<Trip> {
   final int id;
-  final String name;
   final DateTime creationDate;
   final int routeId;
   final int userId;
   const Trip(
       {required this.id,
-      required this.name,
       required this.creationDate,
       required this.routeId,
       required this.userId});
@@ -971,7 +960,6 @@ class Trip extends DataClass implements Insertable<Trip> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
     map['creation_date'] = Variable<DateTime>(creationDate);
     map['route_id'] = Variable<int>(routeId);
     map['user_id'] = Variable<int>(userId);
@@ -981,7 +969,6 @@ class Trip extends DataClass implements Insertable<Trip> {
   TripsCompanion toCompanion(bool nullToAbsent) {
     return TripsCompanion(
       id: Value(id),
-      name: Value(name),
       creationDate: Value(creationDate),
       routeId: Value(routeId),
       userId: Value(userId),
@@ -993,7 +980,6 @@ class Trip extends DataClass implements Insertable<Trip> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Trip(
       id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
       creationDate: serializer.fromJson<DateTime>(json['creationDate']),
       routeId: serializer.fromJson<int>(json['routeId']),
       userId: serializer.fromJson<int>(json['userId']),
@@ -1004,22 +990,15 @@ class Trip extends DataClass implements Insertable<Trip> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
       'creationDate': serializer.toJson<DateTime>(creationDate),
       'routeId': serializer.toJson<int>(routeId),
       'userId': serializer.toJson<int>(userId),
     };
   }
 
-  Trip copyWith(
-          {int? id,
-          String? name,
-          DateTime? creationDate,
-          int? routeId,
-          int? userId}) =>
+  Trip copyWith({int? id, DateTime? creationDate, int? routeId, int? userId}) =>
       Trip(
         id: id ?? this.id,
-        name: name ?? this.name,
         creationDate: creationDate ?? this.creationDate,
         routeId: routeId ?? this.routeId,
         userId: userId ?? this.userId,
@@ -1027,7 +1006,6 @@ class Trip extends DataClass implements Insertable<Trip> {
   Trip copyWithCompanion(TripsCompanion data) {
     return Trip(
       id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
       creationDate: data.creationDate.present
           ? data.creationDate.value
           : this.creationDate,
@@ -1040,7 +1018,6 @@ class Trip extends DataClass implements Insertable<Trip> {
   String toString() {
     return (StringBuffer('Trip(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('creationDate: $creationDate, ')
           ..write('routeId: $routeId, ')
           ..write('userId: $userId')
@@ -1049,13 +1026,12 @@ class Trip extends DataClass implements Insertable<Trip> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, creationDate, routeId, userId);
+  int get hashCode => Object.hash(id, creationDate, routeId, userId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Trip &&
           other.id == this.id &&
-          other.name == this.name &&
           other.creationDate == this.creationDate &&
           other.routeId == this.routeId &&
           other.userId == this.userId);
@@ -1063,36 +1039,30 @@ class Trip extends DataClass implements Insertable<Trip> {
 
 class TripsCompanion extends UpdateCompanion<Trip> {
   final Value<int> id;
-  final Value<String> name;
   final Value<DateTime> creationDate;
   final Value<int> routeId;
   final Value<int> userId;
   const TripsCompanion({
     this.id = const Value.absent(),
-    this.name = const Value.absent(),
     this.creationDate = const Value.absent(),
     this.routeId = const Value.absent(),
     this.userId = const Value.absent(),
   });
   TripsCompanion.insert({
     this.id = const Value.absent(),
-    required String name,
     this.creationDate = const Value.absent(),
     required int routeId,
     required int userId,
-  })  : name = Value(name),
-        routeId = Value(routeId),
+  })  : routeId = Value(routeId),
         userId = Value(userId);
   static Insertable<Trip> custom({
     Expression<int>? id,
-    Expression<String>? name,
     Expression<DateTime>? creationDate,
     Expression<int>? routeId,
     Expression<int>? userId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (name != null) 'name': name,
       if (creationDate != null) 'creation_date': creationDate,
       if (routeId != null) 'route_id': routeId,
       if (userId != null) 'user_id': userId,
@@ -1101,13 +1071,11 @@ class TripsCompanion extends UpdateCompanion<Trip> {
 
   TripsCompanion copyWith(
       {Value<int>? id,
-      Value<String>? name,
       Value<DateTime>? creationDate,
       Value<int>? routeId,
       Value<int>? userId}) {
     return TripsCompanion(
       id: id ?? this.id,
-      name: name ?? this.name,
       creationDate: creationDate ?? this.creationDate,
       routeId: routeId ?? this.routeId,
       userId: userId ?? this.userId,
@@ -1119,9 +1087,6 @@ class TripsCompanion extends UpdateCompanion<Trip> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
     }
     if (creationDate.present) {
       map['creation_date'] = Variable<DateTime>(creationDate.value);
@@ -1139,500 +1104,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
   String toString() {
     return (StringBuffer('TripsCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('creationDate: $creationDate, ')
           ..write('routeId: $routeId, ')
           ..write('userId: $userId')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $TodoCategoryTable extends TodoCategory
-    with TableInfo<$TodoCategoryTable, TodoCategoryData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $TodoCategoryTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, description];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'todo_category';
-  @override
-  VerificationContext validateIntegrity(Insertable<TodoCategoryData> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  TodoCategoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TodoCategoryData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-    );
-  }
-
-  @override
-  $TodoCategoryTable createAlias(String alias) {
-    return $TodoCategoryTable(attachedDatabase, alias);
-  }
-}
-
-class TodoCategoryData extends DataClass
-    implements Insertable<TodoCategoryData> {
-  final int id;
-  final String description;
-  const TodoCategoryData({required this.id, required this.description});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['description'] = Variable<String>(description);
-    return map;
-  }
-
-  TodoCategoryCompanion toCompanion(bool nullToAbsent) {
-    return TodoCategoryCompanion(
-      id: Value(id),
-      description: Value(description),
-    );
-  }
-
-  factory TodoCategoryData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TodoCategoryData(
-      id: serializer.fromJson<int>(json['id']),
-      description: serializer.fromJson<String>(json['description']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'description': serializer.toJson<String>(description),
-    };
-  }
-
-  TodoCategoryData copyWith({int? id, String? description}) => TodoCategoryData(
-        id: id ?? this.id,
-        description: description ?? this.description,
-      );
-  TodoCategoryData copyWithCompanion(TodoCategoryCompanion data) {
-    return TodoCategoryData(
-      id: data.id.present ? data.id.value : this.id,
-      description:
-          data.description.present ? data.description.value : this.description,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TodoCategoryData(')
-          ..write('id: $id, ')
-          ..write('description: $description')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, description);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TodoCategoryData &&
-          other.id == this.id &&
-          other.description == this.description);
-}
-
-class TodoCategoryCompanion extends UpdateCompanion<TodoCategoryData> {
-  final Value<int> id;
-  final Value<String> description;
-  const TodoCategoryCompanion({
-    this.id = const Value.absent(),
-    this.description = const Value.absent(),
-  });
-  TodoCategoryCompanion.insert({
-    this.id = const Value.absent(),
-    required String description,
-  }) : description = Value(description);
-  static Insertable<TodoCategoryData> custom({
-    Expression<int>? id,
-    Expression<String>? description,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (description != null) 'description': description,
-    });
-  }
-
-  TodoCategoryCompanion copyWith({Value<int>? id, Value<String>? description}) {
-    return TodoCategoryCompanion(
-      id: id ?? this.id,
-      description: description ?? this.description,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TodoCategoryCompanion(')
-          ..write('id: $id, ')
-          ..write('description: $description')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $TodoItemsTable extends TodoItems
-    with TableInfo<$TodoItemsTable, TodoItem> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $TodoItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
-  @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 6, maxTextLength: 32),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
-  static const VerificationMeta _contentMeta =
-      const VerificationMeta('content');
-  @override
-  late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'body', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
-  @override
-  late final GeneratedColumn<int> category = GeneratedColumn<int>(
-      'category', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES todo_category (id)'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, title, content, category, createdAt];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'todo_items';
-  @override
-  VerificationContext validateIntegrity(Insertable<TodoItem> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('title')) {
-      context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
-    } else if (isInserting) {
-      context.missing(_titleMeta);
-    }
-    if (data.containsKey('body')) {
-      context.handle(_contentMeta,
-          content.isAcceptableOrUnknown(data['body']!, _contentMeta));
-    } else if (isInserting) {
-      context.missing(_contentMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  TodoItem map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TodoItem(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}category']),
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
-    );
-  }
-
-  @override
-  $TodoItemsTable createAlias(String alias) {
-    return $TodoItemsTable(attachedDatabase, alias);
-  }
-}
-
-class TodoItem extends DataClass implements Insertable<TodoItem> {
-  final int id;
-  final String title;
-  final String content;
-  final int? category;
-  final DateTime? createdAt;
-  const TodoItem(
-      {required this.id,
-      required this.title,
-      required this.content,
-      this.category,
-      this.createdAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['title'] = Variable<String>(title);
-    map['body'] = Variable<String>(content);
-    if (!nullToAbsent || category != null) {
-      map['category'] = Variable<int>(category);
-    }
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
-    }
-    return map;
-  }
-
-  TodoItemsCompanion toCompanion(bool nullToAbsent) {
-    return TodoItemsCompanion(
-      id: Value(id),
-      title: Value(title),
-      content: Value(content),
-      category: category == null && nullToAbsent
-          ? const Value.absent()
-          : Value(category),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-    );
-  }
-
-  factory TodoItem.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TodoItem(
-      id: serializer.fromJson<int>(json['id']),
-      title: serializer.fromJson<String>(json['title']),
-      content: serializer.fromJson<String>(json['content']),
-      category: serializer.fromJson<int?>(json['category']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'title': serializer.toJson<String>(title),
-      'content': serializer.toJson<String>(content),
-      'category': serializer.toJson<int?>(category),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
-    };
-  }
-
-  TodoItem copyWith(
-          {int? id,
-          String? title,
-          String? content,
-          Value<int?> category = const Value.absent(),
-          Value<DateTime?> createdAt = const Value.absent()}) =>
-      TodoItem(
-        id: id ?? this.id,
-        title: title ?? this.title,
-        content: content ?? this.content,
-        category: category.present ? category.value : this.category,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
-      );
-  TodoItem copyWithCompanion(TodoItemsCompanion data) {
-    return TodoItem(
-      id: data.id.present ? data.id.value : this.id,
-      title: data.title.present ? data.title.value : this.title,
-      content: data.content.present ? data.content.value : this.content,
-      category: data.category.present ? data.category.value : this.category,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TodoItem(')
-          ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('content: $content, ')
-          ..write('category: $category, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, title, content, category, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TodoItem &&
-          other.id == this.id &&
-          other.title == this.title &&
-          other.content == this.content &&
-          other.category == this.category &&
-          other.createdAt == this.createdAt);
-}
-
-class TodoItemsCompanion extends UpdateCompanion<TodoItem> {
-  final Value<int> id;
-  final Value<String> title;
-  final Value<String> content;
-  final Value<int?> category;
-  final Value<DateTime?> createdAt;
-  const TodoItemsCompanion({
-    this.id = const Value.absent(),
-    this.title = const Value.absent(),
-    this.content = const Value.absent(),
-    this.category = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  TodoItemsCompanion.insert({
-    this.id = const Value.absent(),
-    required String title,
-    required String content,
-    this.category = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  })  : title = Value(title),
-        content = Value(content);
-  static Insertable<TodoItem> custom({
-    Expression<int>? id,
-    Expression<String>? title,
-    Expression<String>? content,
-    Expression<int>? category,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (title != null) 'title': title,
-      if (content != null) 'body': content,
-      if (category != null) 'category': category,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  TodoItemsCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? title,
-      Value<String>? content,
-      Value<int?>? category,
-      Value<DateTime?>? createdAt}) {
-    return TodoItemsCompanion(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      content: content ?? this.content,
-      category: category ?? this.category,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
-    }
-    if (content.present) {
-      map['body'] = Variable<String>(content.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<int>(category.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TodoItemsCompanion(')
-          ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('content: $content, ')
-          ..write('category: $category, ')
-          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
@@ -1648,34 +1122,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $PointsOfInterestRoutesEntriesTable(this);
   late final $UsersTable users = $UsersTable(this);
   late final $TripsTable trips = $TripsTable(this);
-  late final $TodoCategoryTable todoCategory = $TodoCategoryTable(this);
-  late final $TodoItemsTable todoItems = $TodoItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [
-        pointsOfInterests,
-        routes,
-        pointsOfInterestRoutesEntries,
-        users,
-        trips,
-        todoCategory,
-        todoItems
-      ];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [pointsOfInterests, routes, pointsOfInterestRoutesEntries, users, trips];
 }
 
 typedef $$PointsOfInterestsTableCreateCompanionBuilder
     = PointsOfInterestsCompanion Function({
   Value<int> id,
-  required String name,
+  required String title,
+  required String description,
   required double latitude,
   required double longitude,
 });
 typedef $$PointsOfInterestsTableUpdateCompanionBuilder
     = PointsOfInterestsCompanion Function({
   Value<int> id,
-  Value<String> name,
+  Value<String> title,
+  Value<String> description,
   Value<double> latitude,
   Value<double> longitude,
 });
@@ -1717,8 +1184,11 @@ class $$PointsOfInterestsTableFilterComposer
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get latitude => $composableBuilder(
       column: $table.latitude, builder: (column) => ColumnFilters(column));
@@ -1763,8 +1233,11 @@ class $$PointsOfInterestsTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<double> get latitude => $composableBuilder(
       column: $table.latitude, builder: (column) => ColumnOrderings(column));
@@ -1785,8 +1258,11 @@ class $$PointsOfInterestsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
 
   GeneratedColumn<double> get latitude =>
       $composableBuilder(column: $table.latitude, builder: (column) => column);
@@ -1845,25 +1321,29 @@ class $$PointsOfInterestsTableTableManager extends RootTableManager<
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> name = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String> description = const Value.absent(),
             Value<double> latitude = const Value.absent(),
             Value<double> longitude = const Value.absent(),
           }) =>
               PointsOfInterestsCompanion(
             id: id,
-            name: name,
+            title: title,
+            description: description,
             latitude: latitude,
             longitude: longitude,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String name,
+            required String title,
+            required String description,
             required double latitude,
             required double longitude,
           }) =>
               PointsOfInterestsCompanion.insert(
             id: id,
-            name: name,
+            title: title,
+            description: description,
             latitude: latitude,
             longitude: longitude,
           ),
@@ -1916,12 +1396,10 @@ typedef $$PointsOfInterestsTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function({bool pointsOfInterestRoutesEntriesRefs})>;
 typedef $$RoutesTableCreateCompanionBuilder = RoutesCompanion Function({
   Value<int> id,
-  required String name,
   Value<DateTime> creationDate,
 });
 typedef $$RoutesTableUpdateCompanionBuilder = RoutesCompanion Function({
   Value<int> id,
-  Value<String> name,
   Value<DateTime> creationDate,
 });
 
@@ -1974,9 +1452,6 @@ class $$RoutesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate, builder: (column) => ColumnFilters(column));
@@ -2039,9 +1514,6 @@ class $$RoutesTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate,
       builder: (column) => ColumnOrderings(column));
@@ -2058,9 +1530,6 @@ class $$RoutesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate, builder: (column) => column);
@@ -2136,22 +1605,18 @@ class $$RoutesTableTableManager extends RootTableManager<
               $$RoutesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> name = const Value.absent(),
             Value<DateTime> creationDate = const Value.absent(),
           }) =>
               RoutesCompanion(
             id: id,
-            name: name,
             creationDate: creationDate,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String name,
             Value<DateTime> creationDate = const Value.absent(),
           }) =>
               RoutesCompanion.insert(
             id: id,
-            name: name,
             creationDate: creationDate,
           ),
           withReferenceMapper: (p0) => p0
@@ -2723,14 +2188,12 @@ typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function({bool tripsRefs})>;
 typedef $$TripsTableCreateCompanionBuilder = TripsCompanion Function({
   Value<int> id,
-  required String name,
   Value<DateTime> creationDate,
   required int routeId,
   required int userId,
 });
 typedef $$TripsTableUpdateCompanionBuilder = TripsCompanion Function({
   Value<int> id,
-  Value<String> name,
   Value<DateTime> creationDate,
   Value<int> routeId,
   Value<int> userId,
@@ -2777,9 +2240,6 @@ class $$TripsTableFilterComposer extends Composer<_$AppDatabase, $TripsTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate, builder: (column) => ColumnFilters(column));
@@ -2837,9 +2297,6 @@ class $$TripsTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate,
       builder: (column) => ColumnOrderings(column));
@@ -2896,9 +2353,6 @@ class $$TripsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate, builder: (column) => column);
@@ -2968,28 +2422,24 @@ class $$TripsTableTableManager extends RootTableManager<
               $$TripsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> name = const Value.absent(),
             Value<DateTime> creationDate = const Value.absent(),
             Value<int> routeId = const Value.absent(),
             Value<int> userId = const Value.absent(),
           }) =>
               TripsCompanion(
             id: id,
-            name: name,
             creationDate: creationDate,
             routeId: routeId,
             userId: userId,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String name,
             Value<DateTime> creationDate = const Value.absent(),
             required int routeId,
             required int userId,
           }) =>
               TripsCompanion.insert(
             id: id,
-            name: name,
             creationDate: creationDate,
             routeId: routeId,
             userId: userId,
@@ -3056,475 +2506,6 @@ typedef $$TripsTableProcessedTableManager = ProcessedTableManager<
     (Trip, $$TripsTableReferences),
     Trip,
     PrefetchHooks Function({bool routeId, bool userId})>;
-typedef $$TodoCategoryTableCreateCompanionBuilder = TodoCategoryCompanion
-    Function({
-  Value<int> id,
-  required String description,
-});
-typedef $$TodoCategoryTableUpdateCompanionBuilder = TodoCategoryCompanion
-    Function({
-  Value<int> id,
-  Value<String> description,
-});
-
-final class $$TodoCategoryTableReferences extends BaseReferences<_$AppDatabase,
-    $TodoCategoryTable, TodoCategoryData> {
-  $$TodoCategoryTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$TodoItemsTable, List<TodoItem>>
-      _todoItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-          db.todoItems,
-          aliasName:
-              $_aliasNameGenerator(db.todoCategory.id, db.todoItems.category));
-
-  $$TodoItemsTableProcessedTableManager get todoItemsRefs {
-    final manager = $$TodoItemsTableTableManager($_db, $_db.todoItems)
-        .filter((f) => f.category.id($_item.id));
-
-    final cache = $_typedResult.readTableOrNull(_todoItemsRefsTable($_db));
-    return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
-  }
-}
-
-class $$TodoCategoryTableFilterComposer
-    extends Composer<_$AppDatabase, $TodoCategoryTable> {
-  $$TodoCategoryTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
-
-  Expression<bool> todoItemsRefs(
-      Expression<bool> Function($$TodoItemsTableFilterComposer f) f) {
-    final $$TodoItemsTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.todoItems,
-        getReferencedColumn: (t) => t.category,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$TodoItemsTableFilterComposer(
-              $db: $db,
-              $table: $db.todoItems,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return f(composer);
-  }
-}
-
-class $$TodoCategoryTableOrderingComposer
-    extends Composer<_$AppDatabase, $TodoCategoryTable> {
-  $$TodoCategoryTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
-}
-
-class $$TodoCategoryTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TodoCategoryTable> {
-  $$TodoCategoryTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
-
-  Expression<T> todoItemsRefs<T extends Object>(
-      Expression<T> Function($$TodoItemsTableAnnotationComposer a) f) {
-    final $$TodoItemsTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.todoItems,
-        getReferencedColumn: (t) => t.category,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$TodoItemsTableAnnotationComposer(
-              $db: $db,
-              $table: $db.todoItems,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return f(composer);
-  }
-}
-
-class $$TodoCategoryTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $TodoCategoryTable,
-    TodoCategoryData,
-    $$TodoCategoryTableFilterComposer,
-    $$TodoCategoryTableOrderingComposer,
-    $$TodoCategoryTableAnnotationComposer,
-    $$TodoCategoryTableCreateCompanionBuilder,
-    $$TodoCategoryTableUpdateCompanionBuilder,
-    (TodoCategoryData, $$TodoCategoryTableReferences),
-    TodoCategoryData,
-    PrefetchHooks Function({bool todoItemsRefs})> {
-  $$TodoCategoryTableTableManager(_$AppDatabase db, $TodoCategoryTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$TodoCategoryTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TodoCategoryTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TodoCategoryTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> description = const Value.absent(),
-          }) =>
-              TodoCategoryCompanion(
-            id: id,
-            description: description,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String description,
-          }) =>
-              TodoCategoryCompanion.insert(
-            id: id,
-            description: description,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$TodoCategoryTableReferences(db, table, e)
-                  ))
-              .toList(),
-          prefetchHooksCallback: ({todoItemsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (todoItemsRefs) db.todoItems],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (todoItemsRefs)
-                    await $_getPrefetchedData(
-                        currentTable: table,
-                        referencedTable: $$TodoCategoryTableReferences
-                            ._todoItemsRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$TodoCategoryTableReferences(db, table, p0)
-                                .todoItemsRefs,
-                        referencedItemsForCurrentItem: (item,
-                                referencedItems) =>
-                            referencedItems.where((e) => e.category == item.id),
-                        typedResults: items)
-                ];
-              },
-            );
-          },
-        ));
-}
-
-typedef $$TodoCategoryTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $TodoCategoryTable,
-    TodoCategoryData,
-    $$TodoCategoryTableFilterComposer,
-    $$TodoCategoryTableOrderingComposer,
-    $$TodoCategoryTableAnnotationComposer,
-    $$TodoCategoryTableCreateCompanionBuilder,
-    $$TodoCategoryTableUpdateCompanionBuilder,
-    (TodoCategoryData, $$TodoCategoryTableReferences),
-    TodoCategoryData,
-    PrefetchHooks Function({bool todoItemsRefs})>;
-typedef $$TodoItemsTableCreateCompanionBuilder = TodoItemsCompanion Function({
-  Value<int> id,
-  required String title,
-  required String content,
-  Value<int?> category,
-  Value<DateTime?> createdAt,
-});
-typedef $$TodoItemsTableUpdateCompanionBuilder = TodoItemsCompanion Function({
-  Value<int> id,
-  Value<String> title,
-  Value<String> content,
-  Value<int?> category,
-  Value<DateTime?> createdAt,
-});
-
-final class $$TodoItemsTableReferences
-    extends BaseReferences<_$AppDatabase, $TodoItemsTable, TodoItem> {
-  $$TodoItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $TodoCategoryTable _categoryTable(_$AppDatabase db) =>
-      db.todoCategory.createAlias(
-          $_aliasNameGenerator(db.todoItems.category, db.todoCategory.id));
-
-  $$TodoCategoryTableProcessedTableManager? get category {
-    if ($_item.category == null) return null;
-    final manager = $$TodoCategoryTableTableManager($_db, $_db.todoCategory)
-        .filter((f) => f.id($_item.category!));
-    final item = $_typedResult.readTableOrNull(_categoryTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
-  }
-}
-
-class $$TodoItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $TodoItemsTable> {
-  $$TodoItemsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
-
-  $$TodoCategoryTableFilterComposer get category {
-    final $$TodoCategoryTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.category,
-        referencedTable: $db.todoCategory,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$TodoCategoryTableFilterComposer(
-              $db: $db,
-              $table: $db.todoCategory,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
-}
-
-class $$TodoItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $TodoItemsTable> {
-  $$TodoItemsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
-
-  $$TodoCategoryTableOrderingComposer get category {
-    final $$TodoCategoryTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.category,
-        referencedTable: $db.todoCategory,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$TodoCategoryTableOrderingComposer(
-              $db: $db,
-              $table: $db.todoCategory,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
-}
-
-class $$TodoItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TodoItemsTable> {
-  $$TodoItemsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
-
-  GeneratedColumn<String> get content =>
-      $composableBuilder(column: $table.content, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  $$TodoCategoryTableAnnotationComposer get category {
-    final $$TodoCategoryTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.category,
-        referencedTable: $db.todoCategory,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$TodoCategoryTableAnnotationComposer(
-              $db: $db,
-              $table: $db.todoCategory,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
-}
-
-class $$TodoItemsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $TodoItemsTable,
-    TodoItem,
-    $$TodoItemsTableFilterComposer,
-    $$TodoItemsTableOrderingComposer,
-    $$TodoItemsTableAnnotationComposer,
-    $$TodoItemsTableCreateCompanionBuilder,
-    $$TodoItemsTableUpdateCompanionBuilder,
-    (TodoItem, $$TodoItemsTableReferences),
-    TodoItem,
-    PrefetchHooks Function({bool category})> {
-  $$TodoItemsTableTableManager(_$AppDatabase db, $TodoItemsTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$TodoItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TodoItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TodoItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> title = const Value.absent(),
-            Value<String> content = const Value.absent(),
-            Value<int?> category = const Value.absent(),
-            Value<DateTime?> createdAt = const Value.absent(),
-          }) =>
-              TodoItemsCompanion(
-            id: id,
-            title: title,
-            content: content,
-            category: category,
-            createdAt: createdAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String title,
-            required String content,
-            Value<int?> category = const Value.absent(),
-            Value<DateTime?> createdAt = const Value.absent(),
-          }) =>
-              TodoItemsCompanion.insert(
-            id: id,
-            title: title,
-            content: content,
-            category: category,
-            createdAt: createdAt,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$TodoItemsTableReferences(db, table, e)
-                  ))
-              .toList(),
-          prefetchHooksCallback: ({category = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins: <
-                  T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic>>(state) {
-                if (category) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.category,
-                    referencedTable:
-                        $$TodoItemsTableReferences._categoryTable(db),
-                    referencedColumn:
-                        $$TodoItemsTableReferences._categoryTable(db).id,
-                  ) as T;
-                }
-
-                return state;
-              },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
-        ));
-}
-
-typedef $$TodoItemsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $TodoItemsTable,
-    TodoItem,
-    $$TodoItemsTableFilterComposer,
-    $$TodoItemsTableOrderingComposer,
-    $$TodoItemsTableAnnotationComposer,
-    $$TodoItemsTableCreateCompanionBuilder,
-    $$TodoItemsTableUpdateCompanionBuilder,
-    (TodoItem, $$TodoItemsTableReferences),
-    TodoItem,
-    PrefetchHooks Function({bool category})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3541,8 +2522,4 @@ class $AppDatabaseManager {
       $$UsersTableTableManager(_db, _db.users);
   $$TripsTableTableManager get trips =>
       $$TripsTableTableManager(_db, _db.trips);
-  $$TodoCategoryTableTableManager get todoCategory =>
-      $$TodoCategoryTableTableManager(_db, _db.todoCategory);
-  $$TodoItemsTableTableManager get todoItems =>
-      $$TodoItemsTableTableManager(_db, _db.todoItems);
 }
