@@ -19,29 +19,15 @@ class RouteCreationBloc extends Bloc<RouteEvent, RouteState>{
   void _onRouteStarted(RouteStarted event, Emitter<RouteState> emit) {}
 
   void _onRouteEntryAdded(RouteEntryAdded event, Emitter<RouteState> emit) {
-    RouteItemDTO? firstRepeated = routeRepository.routeItemEntries
-        .map((entry) => entry.routeItem)
-        .firstWhereOrNull((ri) => ri == event.routeItem);
+    RouteItemEntry? firstRepeated = routeRepository.routeItemEntries
+        .firstWhereOrNull((entry) => entry.routeItem == event.routeItem);
     if (firstRepeated != null) {
-      print(firstRepeated.name + ' already exists in the list');
-      // emit(RouteEntryRepeated(firstRepeated));
+      emit(RouteStateRepeated(routeRepository.routeItemEntries, firstRepeated));
       return;
     }
-    print("CHECK IF STATE IS DIFFERENT BEFORE");
-    print(state.routeItemEntries);
-    print(routeRepository.routeItemEntries);
-    print(event.routeItem);
-
     routeRepository.addRouteItemEntry(RouteItemEntry(event.routeItem));
-    print("CHECK IF STATE IS DIFFERENT AFTER");
-    print(state.routeItemEntries);
-    print(routeRepository.routeItemEntries);
-    print(event.routeItem);
-
     emit(RouteStateCreated(routeRepository.routeItemEntries));
   }
-
-  void _onRouteEntryRepeated(RouteEntryRepeated event, Emitter<RouteState> emit) {}
 
   void _onRouteEntryRemoved(RouteEntryRemoved event, Emitter<RouteState> emit) {
     routeRepository.removeRouteItemEntry(event.routeItemEntry);

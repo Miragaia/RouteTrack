@@ -8,18 +8,9 @@ abstract class RouteEvent extends Equatable {
 }
 
 final class RouteStarted extends RouteEvent {}
-final class RouteCleared extends RouteEvent {}
 
 final class RouteEntryAdded extends RouteEvent {
   RouteEntryAdded({required this.routeItem});
-  final RouteItemDTO routeItem;
-
-  @override
-  List<Object?> get props => [routeItem];
-}
-
-final class RouteEntryRepeated extends RouteEvent {
-  RouteEntryRepeated({required this.routeItem});
   final RouteItemDTO routeItem;
 
   @override
