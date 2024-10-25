@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
+import 'package:routertrack/bloc/route_creation/route_item_dto.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
-import '../bloc/route_cart/route_cart_bloc.dart';
-import '../bloc/route_cart/route_cart_events.dart';
+import '../bloc/route_creation/route_creation_bloc.dart';
+import '../bloc/route_creation/route_creation_events.dart';
 import '../bloc/search_location_bloc.dart';
-import '../database/database.dart';
-import 'CustomElevatedButton.dart';
 
 class RouteBottomSheet extends StatefulWidget {
   const RouteBottomSheet({super.key});
@@ -40,7 +39,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final RouteCartBloc _routeCartBloc = BlocProvider.of<RouteCartBloc>(context);
+    final RouteCreationBloc _routeCreationBloc = BlocProvider.of<RouteCreationBloc>(context);
 
     return DraggableScrollableSheet(
       controller: _draggableScrollableSheetController,
@@ -80,13 +79,12 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                               IconButton(
                                 icon: Icon(Icons.my_location_outlined),
                                 onPressed: () {
-
-                                  _routeCartBloc.add(RouteCartPointOfInterestAdded(
-                                      pointsOfInterest: PointsOfInterest(
-                                          id: 1,
-                                          name: "name",
-                                          latitude: 12.0,
-                                          longitude: 12.0
+                                  _routeCreationBloc.add(RouteEntryAdded(
+                                      routeItem: RouteItemDTO(
+                                        name: "name",
+                                        country: "Portugal",
+                                        latitude: 1,
+                                        longitude: 2,
                                       )
                                   ));
                                 },
@@ -106,13 +104,9 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                       countries: ["pt"],
                       isLatLngRequired: true,
                       getPlaceDetailWithLatLng: (Prediction prediction) {
-                        print("inserting event");
-                        print("inserting event");
                         searchLocationBloc.add(SearchLocationEvent(LatLng(
                             double.parse(prediction.lat.toString()), double.parse(prediction.lng.toString())
                         )));
-                        print("inserted event");
-                        print("inserted event");
                       },
 
                       itemClick: (Prediction prediction) {
@@ -170,7 +164,9 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                         ),
                         const Spacer(),
                         ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            _routeCreationBloc.add(RouteEntryClear());
+                          },
                           icon: const Icon(Icons.delete_rounded),
                           label: const Text('Clear'),
                           iconAlignment: IconAlignment.end,

@@ -5,7 +5,8 @@ import 'package:routertrack/repository/route_repository.dart';
 import 'package:routertrack/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'bloc/route_cart/route_cart_bloc.dart';
+import 'bloc/route_creation/route_creation_bloc.dart';
+import 'bloc/route_creation/route_item_dto.dart';
 import 'bloc/search_location_bloc.dart';
 import 'database/database.dart';
 
@@ -18,8 +19,8 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   final RouteRepository routeRepository = RouteRepository(
-    PointsOfInterest(id: 2, name: "origin", latitude: 1, longitude: 1),
-    PointsOfInterest(id: 3, name: "destination", latitude: 1, longitude: 1),
+    RouteItemDTO(name: "origin", country: "Portugal", latitude: 1, longitude: 1),
+    RouteItemDTO(name: "destination", country: "Portugal", latitude: 1, longitude: 1),
   );
 
   @override
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => RouteCartBloc(routeRepository: routeRepository),
+          create: (context) => RouteCreationBloc(routeRepository: routeRepository),
         ),
         BlocProvider(
           create: (context) => SearchLocationBloc(const LatLng(0, 0)),

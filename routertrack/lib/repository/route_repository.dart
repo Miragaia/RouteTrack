@@ -1,55 +1,46 @@
 import 'dart:collection';
-import 'dart:ui';
-
-import 'package:routertrack/database/database.dart';
+import '../bloc/route_creation/route_item_dto.dart';
 
 final class PointsOfInterestEntry extends LinkedListEntry<PointsOfInterestEntry>{
-  final PointsOfInterest pointsOfInterest;
+  final RouteItemDTO routeItem;
 
-  PointsOfInterestEntry(this.pointsOfInterest);
+  PointsOfInterestEntry(this.routeItem);
 
   @override
   String toString() {
-    return pointsOfInterest.toString();
+    return routeItem.toString();
   }
 }
 
 class RouteRepository {
 
-  final LinkedList<PointsOfInterestEntry> pointsOfInterestLinkedList = LinkedList<PointsOfInterestEntry>();
+  final LinkedList<PointsOfInterestEntry> routeItemEntries = LinkedList<PointsOfInterestEntry>();
 
   RouteRepository(
-      PointsOfInterest origin,
-      PointsOfInterest destination,
+      RouteItemDTO origin,
+      RouteItemDTO destination,
   ) {
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    print("constructor");
-    pointsOfInterestLinkedList.add(PointsOfInterestEntry(origin));
-    pointsOfInterestLinkedList.add(PointsOfInterestEntry(destination));
+    routeItemEntries.add(PointsOfInterestEntry(origin));
+    routeItemEntries.add(PointsOfInterestEntry(destination));
   }
 
-  Stream<PointsOfInterest> getPointsOfInterest() {
-    return Stream.fromIterable(pointsOfInterestLinkedList.map((entry) => entry.pointsOfInterest));
+  Stream<RouteItemDTO> getRouteItemEntries() {
+    return Stream.fromIterable(routeItemEntries.map((entry) => entry.routeItem));
   }
 
-  void addPointOfInterestEntry(PointsOfInterest pointsOfInterest){
-    pointsOfInterestLinkedList.last.insertBefore(PointsOfInterestEntry(pointsOfInterest));
+  void addRouteItemEntry(PointsOfInterestEntry pointOfInterestEntry){
+    routeItemEntries.last.insertBefore(pointOfInterestEntry);
   }
 
-  void removePointOfInterestEntry(PointsOfInterestEntry pointOfInterestEntry){
+  void removeRouteItemEntry(PointsOfInterestEntry pointOfInterestEntry){
     pointOfInterestEntry.unlink();
   }
 
-  void clearPointsOfInterestEntries(){
-    pointsOfInterestLinkedList.clear();
+  void clearIntermediateRouteItemEntries(){
+    // clear all but the first and last
+    while(routeItemEntries.length > 2){
+      routeItemEntries.first.next?.unlink();
+    }
   }
 
 }

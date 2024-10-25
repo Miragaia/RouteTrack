@@ -2,8 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:routertrack/bloc/route_cart/route_cart_bloc.dart';
-import 'package:routertrack/bloc/route_cart/route_cart_state.dart';
+
+import '../bloc/route_creation/route_creation_bloc.dart';
+import '../bloc/route_creation/route_creation_state.dart';
 
 
 class StepperTimeline extends StatefulWidget {
@@ -18,9 +19,8 @@ class _StepperTimelineState extends State<StepperTimeline> {
 
   @override
   Widget build(BuildContext context) {
-    final RouteCartBloc _routeCartBloc = BlocProvider.of<RouteCartBloc>(context);
 
-    return BlocBuilder<RouteCartBloc, RouteCartState>(
+    return BlocBuilder<RouteCreationBloc, RouteState>(
       builder: (context, state) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -46,14 +46,14 @@ class _StepperTimelineState extends State<StepperTimeline> {
                 ),
               ),
             ),
-            currentStep: state.pointsOfInterestLinkedList.length - 1,
+            currentStep: state.routeItemEntries.length - 1,
             type: StepperType.vertical, // Make it vertical like a timeline
             onStepTapped: (int index){
               setState(() {
                 _index = index;
               });
             },
-            steps: state.pointsOfInterestLinkedList.indexed.map((item) {
+            steps: state.routeItemEntries.indexed.map((item) {
               final (index, entry) = item;
 
               return Step(
@@ -61,7 +61,7 @@ class _StepperTimelineState extends State<StepperTimeline> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      entry.pointsOfInterest.name,
+                      entry.routeItem.name,
                       style: TextStyle(
                         overflow: TextOverflow.ellipsis,
                         fontSize: 15,
@@ -70,7 +70,7 @@ class _StepperTimelineState extends State<StepperTimeline> {
                       ),
                     ),
                     Text(
-                      entry.pointsOfInterest.name,
+                      entry.routeItem.country,
                       style: TextStyle(
                         height: 1.2,
                         color: Color.fromARGB(255, 112, 112, 112),
