@@ -6,10 +6,10 @@ import 'package:routertrack/repository/route_repository.dart';
 @immutable
 sealed class RouteState extends Equatable {
   const RouteState(this.routeItemEntries);
-  final LinkedList<PointsOfInterestEntry> routeItemEntries;
+  final LinkedList<RouteItemEntry> routeItemEntries;
 
   @override
-  List<Object> get props => [routeItemEntries];
+  List<Object> get props => [routeItemEntries.iterator];
 }
 
 final class RouteStateCreated extends RouteState {

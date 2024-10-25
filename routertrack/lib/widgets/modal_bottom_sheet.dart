@@ -101,9 +101,20 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                         )
                       ),
                       debounceTime: 400,
-                      countries: ["pt"],
+                      countries: ["pt", "es"],
                       isLatLngRequired: true,
                       getPlaceDetailWithLatLng: (Prediction prediction) {
+                        String name = prediction.description?.split(", ").first ?? "";
+                        String country = prediction.description ?? "";
+                        _routeCreationBloc.add(RouteEntryAdded(
+                            routeItem: RouteItemDTO(
+                              name: name,
+                              country: country,
+                              latitude: double.parse(prediction.lat.toString()),
+                              longitude: double.parse(prediction.lng.toString()),
+                            )
+                        ));
+
                         searchLocationBloc.add(SearchLocationEvent(LatLng(
                             double.parse(prediction.lat.toString()), double.parse(prediction.lng.toString())
                         )));

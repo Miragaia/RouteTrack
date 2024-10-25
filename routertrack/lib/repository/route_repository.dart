@@ -1,10 +1,10 @@
 import 'dart:collection';
 import '../bloc/route_creation/route_item_dto.dart';
 
-final class PointsOfInterestEntry extends LinkedListEntry<PointsOfInterestEntry>{
+final class RouteItemEntry extends LinkedListEntry<RouteItemEntry>{
   final RouteItemDTO routeItem;
 
-  PointsOfInterestEntry(this.routeItem);
+  RouteItemEntry(this.routeItem);
 
   @override
   String toString() {
@@ -14,25 +14,25 @@ final class PointsOfInterestEntry extends LinkedListEntry<PointsOfInterestEntry>
 
 class RouteRepository {
 
-  final LinkedList<PointsOfInterestEntry> routeItemEntries = LinkedList<PointsOfInterestEntry>();
+  final LinkedList<RouteItemEntry> routeItemEntries = LinkedList<RouteItemEntry>();
 
   RouteRepository(
       RouteItemDTO origin,
       RouteItemDTO destination,
   ) {
-    routeItemEntries.add(PointsOfInterestEntry(origin));
-    routeItemEntries.add(PointsOfInterestEntry(destination));
+    routeItemEntries.add(RouteItemEntry(origin));
+    routeItemEntries.add(RouteItemEntry(destination));
   }
 
   Stream<RouteItemDTO> getRouteItemEntries() {
     return Stream.fromIterable(routeItemEntries.map((entry) => entry.routeItem));
   }
 
-  void addRouteItemEntry(PointsOfInterestEntry pointOfInterestEntry){
+  void addRouteItemEntry(RouteItemEntry pointOfInterestEntry){
     routeItemEntries.last.insertBefore(pointOfInterestEntry);
   }
 
-  void removeRouteItemEntry(PointsOfInterestEntry pointOfInterestEntry){
+  void removeRouteItemEntry(RouteItemEntry pointOfInterestEntry){
     pointOfInterestEntry.unlink();
   }
 

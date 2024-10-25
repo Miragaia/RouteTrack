@@ -28,7 +28,7 @@ final class RouteEntryRepeated extends RouteEvent {
 
 final class RouteEntryRemoved extends RouteEvent {
   RouteEntryRemoved({required this.routeItemEntry});
-  final PointsOfInterestEntry routeItemEntry;
+  final RouteItemEntry routeItemEntry;
 
   @override
   List<Object?> get props => [routeItemEntry];

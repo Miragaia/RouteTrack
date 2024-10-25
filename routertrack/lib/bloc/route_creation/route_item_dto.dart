@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 
 class RouteItemDTO extends Equatable{
-  String name;
-  String country;
-  double latitude;
-  double longitude;
+  final String name;
+  final String country;
+  final double latitude;
+  final double longitude;
 
-  RouteItemDTO({
+  const RouteItemDTO({
     required this.name,
     required this.country,
     required this.latitude,

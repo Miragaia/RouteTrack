@@ -27,7 +27,17 @@ class RouteCreationBloc extends Bloc<RouteEvent, RouteState>{
       // emit(RouteEntryRepeated(firstRepeated));
       return;
     }
-    routeRepository.addRouteItemEntry(PointsOfInterestEntry(event.routeItem));
+    print("CHECK IF STATE IS DIFFERENT BEFORE");
+    print(state.routeItemEntries);
+    print(routeRepository.routeItemEntries);
+    print(event.routeItem);
+
+    routeRepository.addRouteItemEntry(RouteItemEntry(event.routeItem));
+    print("CHECK IF STATE IS DIFFERENT AFTER");
+    print(state.routeItemEntries);
+    print(routeRepository.routeItemEntries);
+    print(event.routeItem);
+
     emit(RouteStateCreated(routeRepository.routeItemEntries));
   }
 
