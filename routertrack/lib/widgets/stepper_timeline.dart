@@ -61,7 +61,7 @@ class _StepperTimelineState extends State<StepperTimeline> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      entry.routeItem.name,
+                      entry.routeItem.title,
                       style: TextStyle(
                         overflow: TextOverflow.ellipsis,
                         fontSize: 15,
@@ -70,7 +70,7 @@ class _StepperTimelineState extends State<StepperTimeline> {
                       ),
                     ),
                     Text(
-                      entry.routeItem.country,
+                      entry.routeItem.description,
                       style: TextStyle(
                         height: 1.2,
                         color: Color.fromARGB(255, 112, 112, 112),

@@ -3,31 +3,16 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 part 'database.g.dart';
 
-class TodoItems extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text().withLength(min: 6, max: 32)();
-  TextColumn get content => text().named('body')();
-  IntColumn get category =>
-      integer().nullable().references(TodoCategory, #id)();
-  DateTimeColumn get createdAt => dateTime().nullable()();
-}
-
-class TodoCategory extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get description => text()();
-}
-
-
 class PointsOfInterests extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text().withLength(min: 6, max: 32)();
+  TextColumn get title => text().withLength(max: 64)();
+  TextColumn get description => text().withLength(max: 128)();
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
 }
 
 class Routes extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text().withLength(min: 6, max: 32)();
   DateTimeColumn get creationDate => dateTime().withDefault(Constant(DateTime.now()))();
 }
 
@@ -39,7 +24,6 @@ class PointsOfInterestRoutesEntries extends Table {
 
 class Trips extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text().withLength(min: 6, max: 32)();
   DateTimeColumn get creationDate => dateTime().withDefault(Constant(DateTime.now()))();
   // Foreign Keys
   // Route -- 1xN -- Trips
@@ -54,7 +38,7 @@ class Users extends Table {
 
 
 @DriftDatabase(
-  tables: [PointsOfInterests, Routes, PointsOfInterestRoutesEntries, Trips, Users, TodoItems, TodoCategory],
+  tables: [PointsOfInterests, Routes, PointsOfInterestRoutesEntries, Trips, Users],
 )
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a schemaVersion getter

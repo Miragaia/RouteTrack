@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:routertrack/repository/database_repository.dart';
 import 'package:routertrack/repository/route_repository.dart';
 import 'package:routertrack/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,9 +19,9 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final RouteRepository routeRepository = RouteRepository(
-    RouteItemDTO(name: "origin", country: "Portugal", latitude: 1, longitude: 1),
-    RouteItemDTO(name: "destination", country: "Portugal", latitude: 1, longitude: 1),
+  final RouteCreationRepository routeRepository = RouteCreationRepository(
+    RouteItemDTO(title: "origin", description: "Portugal", latitude: 1, longitude: 1),
+    RouteItemDTO(title: "destination", description: "Portugal", latitude: 1, longitude: 1),
   );
 
   @override
@@ -28,11 +29,15 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => RouteCreationBloc(routeRepository: routeRepository),
+          create: (context) => RouteCreationBloc(
+            routeRepository: routeRepository,
+            routePersistenceRepository: RoutePersistenceRepository(),
+          ),
         ),
         BlocProvider(
           create: (context) => SearchLocationBloc(const LatLng(0, 0)),
         ),
+
       ],
       child: MaterialApp(
         title: 'RouterTrack',

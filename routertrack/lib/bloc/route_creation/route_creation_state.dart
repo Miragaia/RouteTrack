@@ -16,6 +16,15 @@ final class RouteStateCreated extends RouteState {
   const RouteStateCreated(super.pointsOfInterestLinkedList);
 }
 
+final class RouteStateRepeated extends RouteState {
+  const RouteStateRepeated(super.pointsOfInterestLinkedList, this.repeatedEntry);
+  final RouteItemEntry repeatedEntry;
+}
+
 final class RouteStateCleared extends RouteState {
   const RouteStateCleared(super.pointsOfInterestLinkedList);
+}
+
+final class RouteStatePersisted extends RouteState {
+  const RouteStatePersisted(super.pointsOfInterestLinkedList);
 }
