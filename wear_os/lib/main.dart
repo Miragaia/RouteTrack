@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:location/location.dart';
+import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
 void main() {
@@ -52,50 +52,23 @@ class TripTrackerPage extends StatefulWidget {
 }
 
 class _TripTrackerPageState extends State<TripTrackerPage> {
+  static const platform = MethodChannel('location_permission');
+  static const eventChannel = EventChannel('location_updates');
   Trip? trip;
-  StreamSubscription<LocationData>? locationStream;
-  final double proximityThreshold = 50.0; // meters
-  final Location location = Location();
+  StreamSubscription<dynamic>? locationStream;
+  final double proximityThreshold = 50.0;
 
   @override
   void initState() {
     super.initState();
     _initializeTrip();
-    _setupLocationTracking();
+    _startLocationUpdates();
   }
 
   @override
   void dispose() {
     locationStream?.cancel();
     super.dispose();
-  }
-
-  Future<void> _setupLocationTracking() async {
-    bool serviceEnabled = await _checkLocationService();
-    bool permissionGranted = await _requestLocationPermission();
-
-    if (serviceEnabled && permissionGranted) {
-      print('Starting location updates');
-      _startLocationUpdates();
-    }
-  }
-
-  Future<bool> _checkLocationService() async {
-    bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-    }
-    print(' Location service enabled: $serviceEnabled');
-    return serviceEnabled;
-  }
-
-  Future<bool> _requestLocationPermission() async {
-    PermissionStatus permissionStatus = await location.hasPermission();
-    if (permissionStatus == PermissionStatus.denied) {
-      permissionStatus = await location.requestPermission();
-    }
-    print(' Permission status: $permissionStatus');
-    return permissionStatus == PermissionStatus.granted;
   }
 
   void _initializeTrip() {
@@ -116,26 +89,31 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
     ]);
   }
 
-  void _startLocationUpdates() {
-    locationStream = location.onLocationChanged.listen((LocationData locationData) {
-      print('Location updated1: ${locationData.latitude}, ${locationData.longitude}');
-      if (locationData.latitude != null && locationData.longitude != null) {
-        print('Location updated2: ${locationData.latitude}, ${locationData.longitude}');
-        _checkProximityToPoints(locationData);
+  Future<void> _startLocationUpdates() async {
+    try {
+      await platform.invokeMethod('requestPermission');
+      final bool permissionGranted = await platform.invokeMethod('checkPermission');
+      if (permissionGranted) {
+        locationStream = eventChannel.receiveBroadcastStream().listen((event) {
+          List<double> coords = _parseCoordinates(event);
+          print("Coordinates: $coords");
+          _checkProximityToPoints(coords[0], coords[1]);
+        });
       }
-    });
+    } on PlatformException catch (e) {
+      print("Failed to start location updates: '${e.message}'.");
+    }
   }
 
-  void _checkProximityToPoints(LocationData currentLocation) {
+  List<double> _parseCoordinates(dynamic event) {
+    var parts = (event as String).split(" ");
+    return [double.parse(parts[0]), double.parse(parts[1])];
+  }
+
+  void _checkProximityToPoints(double latitude, double longitude) {
     for (var point in trip!.points) {
       if (!point.visited) {
-        print('Checking proximity to ${point.title}');
-        double distance = _calculateDistance(
-          currentLocation.latitude!,
-          currentLocation.longitude!,
-          point.latitude,
-          point.longitude,
-        );
+        double distance = _calculateDistance(latitude, longitude, point.latitude, point.longitude);
         print('Distance to ${point.title}: $distance meters');
 
         if (distance <= proximityThreshold) {
