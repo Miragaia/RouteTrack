@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:routertrack/screens/map.dart';
-import 'package:routertrack/widgets/stores_map.dart'; // Assuming StoresMap is your map screen
+import 'package:routertrack/screens/BluetoothConnectionPage.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
           title: Text('Home Page'),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0), // Reduced padding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -23,7 +23,6 @@ class HomePage extends StatelessWidget {
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        // Navigate to StoresMap page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -37,20 +36,20 @@ class HomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: const Padding(
-                          padding: EdgeInsets.all(24.0), // Increase padding
+                          padding: EdgeInsets.all(20.0), // Reduced padding
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.add_circle_outline,
-                                size: 100, // Bigger icon
+                                size: 80, // Reduced icon size
                                 color: Colors.blue,
                               ),
-                              SizedBox(height: 20), // More spacing between icon and text
+                              SizedBox(height: 16), // Reduced spacing
                               Text(
                                 'CREATE TRIP',
                                 style: TextStyle(
-                                  fontSize: 26, // Bigger text
+                                  fontSize: 24, // Slightly smaller text
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -62,7 +61,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 40), // More space between the cards
+              SizedBox(height: 20), // Reduced space between cards
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -73,20 +72,20 @@ class HomePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: const Padding(
-                        padding: EdgeInsets.all(24.0), // Increase padding
+                        padding: EdgeInsets.all(20.0), // Reduced padding
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.map,
-                              size: 100, // Bigger icon
+                              size: 80, // Reduced icon size
                               color: Colors.green,
                             ),
-                            SizedBox(height: 20), // More spacing between icon and text
+                            SizedBox(height: 16), // Reduced spacing
                             Text(
                               'SHOW TRIPS',
                               style: TextStyle(
-                                fontSize: 26, // Bigger text
+                                fontSize: 24, // Slightly smaller text
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -96,6 +95,47 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(height: 20), // Reduced space for smaller card alignment
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BluetoothConnectionPage(),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(12.0), // Slightly reduced padding
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.watch,
+                            size: 50, // Reduced icon size
+                            color: Colors.orange,
+                          ),
+                          SizedBox(height: 8), // Reduced spacing
+                          Text(
+                            'CONNECT TO SMARTWATCH',
+                            style: TextStyle(
+                              fontSize: 16, // Slightly smaller text
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
