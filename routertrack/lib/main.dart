@@ -7,8 +7,9 @@ import 'package:routertrack/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'bloc/route_creation/route_creation_bloc.dart';
-import 'bloc/route_creation/route_item_dto.dart';
+import 'dto/route_item_dto.dart';
 import 'bloc/search_location_bloc.dart';
+import 'cubit/routes_cubit/routes_cubit.dart';
 import 'database/database.dart';
 
 
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
     RouteItemDTO(title: "origin", description: "Portugal", latitude: 1, longitude: 1),
     RouteItemDTO(title: "destination", description: "Portugal", latitude: 1, longitude: 1),
   );
+  final routePersistenceRepository = RoutePersistenceRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +33,14 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => RouteCreationBloc(
             routeRepository: routeRepository,
-            routePersistenceRepository: RoutePersistenceRepository(),
+            routePersistenceRepository: routePersistenceRepository,
           ),
         ),
         BlocProvider(
           create: (context) => SearchLocationBloc(const LatLng(0, 0)),
+        ),
+        BlocProvider(
+          create: (context) => RoutesCubit(routePersistenceRepository),
         ),
 
       ],

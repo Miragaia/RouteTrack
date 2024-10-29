@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
-import 'package:routertrack/bloc/route_creation/route_item_dto.dart';
+import 'package:routertrack/dto/route_item_dto.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
 import '../bloc/route_creation/route_creation_bloc.dart';
 import '../bloc/route_creation/route_creation_events.dart';

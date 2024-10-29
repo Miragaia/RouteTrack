@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:routertrack/bloc/route_creation/route_item_dto.dart';
+import 'package:routertrack/dto/route_item_dto.dart';
 import '../../repository/route_repository.dart';
 
 abstract class RouteEvent extends Equatable {

@@ -1,42 +1,55 @@
-import 'dart:ui';
-
+import 'package:drift/drift.dart';
 import 'package:routertrack/database/database.dart';
+import 'package:routertrack/dto/route_with_points_dto.dart';
+import 'package:collection/collection.dart';
 
 class RoutePersistenceRepository {
-  AppDatabase database = AppDatabase();
-
+  AppDatabase db = AppDatabase();
 
   Future<void> addRouteWithPointsOfInterest(List<PointsOfInterestsCompanion> pointsOfInterest) async {
-
-    print("READING");
-    print(await database.select(database.routes).get());
-    print(await database.select(database.pointsOfInterests).get());
-    print(await database.select(database.pointsOfInterestRoutesEntries).get());
-    print("INSERTING");
-
-    await database.transaction(() async {
+    await db.transaction(() async {
       // Add Points of Interest (can't use insertAll because of needing the id's)
       List<int> pointsOfInterestIds = [];
       for (PointsOfInterestsCompanion pointOfInterest in pointsOfInterest){
-        int id = await database.into(database.pointsOfInterests).insert(pointOfInterest);
+        int id = await db.into(db.pointsOfInterests).insert(pointOfInterest);
         pointsOfInterestIds.add(id);
       }
 
       // Add Route
-      int routeId = await database.into(database.routes).insert(RoutesCompanion.insert());
+      int routeId = await db.into(db.routes).insert(RoutesCompanion.insert());
 
       // Add Points of Interest to Route Entries (can't use insertAll because of needing the id's)
       for (int id in pointsOfInterestIds){
-        await database.into(database.pointsOfInterestRoutesEntries).insert(PointsOfInterestRoutesEntriesCompanion.insert(
+        await db.into(db.pointsOfInterestRoutesEntries).insert(PointsOfInterestRoutesEntriesCompanion.insert(
           pointOfInterestId: id,
           routeId: routeId,
         ));
       }
-
     });
-    print("READING AGAIN");
-    print(await database.select(database.routes).get());
-    print(await database.select(database.pointsOfInterests).get());
-    print(await database.select(database.pointsOfInterestRoutesEntries).get());
   }
+
+  Stream<List<RouteWithPoints>> watchRoutes() {
+    print("TESTING HERE");
+
+    return db.select(db.routes).join([
+      innerJoin(
+        db.pointsOfInterestRoutesEntries,
+        db.pointsOfInterestRoutesEntries.routeId.equalsExp(db.routes.id),
+      ),
+      innerJoin(
+        db.pointsOfInterests,
+        db.pointsOfInterests.id.equalsExp(db.pointsOfInterestRoutesEntries.pointOfInterestId),
+      )
+    ]).watch().map((rows) {
+      final groupedRoutes = groupBy(rows, (row) => row.readTable(db.routes));
+
+      return groupedRoutes.entries.map((entry) {
+        return RouteWithPoints(
+          route: entry.key,
+          pointsOfInterest: entry.value.map((row) => row.readTable(db.pointsOfInterests)).toList(),
+        );
+      }).toList();
+    });
+  }
+
 }

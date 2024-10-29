@@ -1,5 +1,5 @@
 import 'dart:collection';
-import '../bloc/route_creation/route_item_dto.dart';
+import '../dto/route_item_dto.dart';
 import '../database/database.dart';
 
 final class RouteItemEntry extends LinkedListEntry<RouteItemEntry>{

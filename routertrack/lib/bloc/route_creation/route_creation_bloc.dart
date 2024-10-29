@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:routertrack/bloc/route_creation/route_creation_events.dart';
 import 'package:routertrack/bloc/route_creation/route_creation_state.dart';
-import 'package:routertrack/bloc/route_creation/route_item_dto.dart';
+import 'package:routertrack/dto/route_item_dto.dart';
 import 'package:routertrack/repository/database_repository.dart';
 import '../../repository/route_repository.dart';
 
