@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
+import 'dart:convert';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 
 void main() {
   runApp(const WearOSApp());
@@ -21,12 +24,25 @@ class Point {
     required this.latitude,
     required this.longitude,
   });
+
+  factory Point.fromJson(Map<String, dynamic> json) {
+    return Point(
+      title: json['title'],
+      description: json['description'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+    );
+  }
 }
 
 class Trip {
   final List<Point> points;
 
   Trip(this.points);
+
+  factory Trip.fromJson(List<dynamic> json) {
+    return Trip(json.map((point) => Point.fromJson(point)).toList());
+  }
 }
 
 class WearOSApp extends StatelessWidget {
@@ -54,45 +70,70 @@ class TripTrackerPage extends StatefulWidget {
 class _TripTrackerPageState extends State<TripTrackerPage> {
   static const platform = MethodChannel('location_permission');
   static const eventChannel = EventChannel('location_updates');
+  final double proximityThreshold = 50.0;
   Trip? trip;
   StreamSubscription<dynamic>? locationStream;
-  final double proximityThreshold = 50.0;
+  late MqttServerClient mqttClient;
 
   @override
   void initState() {
     super.initState();
-    _initializeTrip();
+    _connectToMQTTBroker();
     _startLocationUpdates();
   }
 
   @override
   void dispose() {
     locationStream?.cancel();
+    mqttClient.disconnect();
     super.dispose();
   }
 
-  void _initializeTrip() {
-    trip = Trip([
-      Point(
-        title: "Point 1",
-        description: "A beautiful park",
-        latitude: 40.6309,
-        longitude: -8.6445,
-      ),
-      Point(
-        title: "Point 2",
-        description: "Historic landmark",
-        latitude: 37.8044,
-        longitude: -122.2711,
-      ),
-      Point(
-        title: "Point 2",
-        description: "Historic landmark2",
-        latitude: 40.8044,
-        longitude: -122.2711,
-      ),
-      // Add more points as needed
-    ]);
+  Future<void> _connectToMQTTBroker() async {
+    mqttClient = MqttServerClient('broker.hivemq.com', 'wear_os_trip_tracker');
+    mqttClient.port = 1883;
+    mqttClient.keepAlivePeriod = 60;
+    mqttClient.onConnected = _onConnected;
+    mqttClient.onDisconnected = _onDisconnected;
+    mqttClient.onSubscribed = _onSubscribed;
+    mqttClient.logging(on: true);
+
+    try {
+      await mqttClient.connect();
+    } catch (e) {
+      print('MQTT connection failed: $e');
+      mqttClient.disconnect();
+    }
+  }
+
+  void _onConnected() {
+    print('Connected to MQTT Broker');
+    mqttClient.subscribe('trip/data', MqttQos.atMostOnce);
+    mqttClient.updates!.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
+      final MqttPublishMessage message = messages[0].payload as MqttPublishMessage;
+      final payload = MqttPublishPayload.bytesToStringAsString(message.payload.message);
+      print('Received message: $payload');
+      _initializeTripFromMQTT(payload);
+    });
+  }
+
+  void _onDisconnected() {
+    print('Disconnected from MQTT Broker');
+  }
+
+  void _onSubscribed(String topic) {
+    print('Subscribed to topic: $topic');
+  }
+
+  void _initializeTripFromMQTT(String payload) {
+    try {
+      final List<dynamic> jsonData = jsonDecode(payload);
+      setState(() {
+        trip = Trip.fromJson(jsonData);
+      });
+    } catch (e) {
+      print('Error parsing trip data: $e');
+    }
   }
 
   Future<void> _startLocationUpdates() async {
@@ -117,7 +158,7 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
   }
 
   void _checkProximityToPoints(double latitude, double longitude) {
-    for (var point in trip!.points) {
+    for (var point in trip?.points ?? []) {
       if (!point.visited) {
         double distance = _calculateDistance(latitude, longitude, point.latitude, point.longitude);
         print('Distance to ${point.title}: $distance meters');
@@ -150,30 +191,23 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(
-          'Nearby Point',
-          style: const TextStyle(fontSize: 16), // Smaller title text
-        ),
+        title: const Text('Nearby Point', style: TextStyle(fontSize: 16)),
         content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 250), // Constrain width for smaller screens
+          constraints: const BoxConstraints(maxWidth: 250),
           child: Text(
             'You are near ${point.title}: ${point.description}',
-            style: const TextStyle(fontSize: 14), // Smaller content text
+            style: const TextStyle(fontSize: 14),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(fontSize: 14), // Smaller button text
-            ),
+            child: const Text('Close', style: TextStyle(fontSize: 14)),
           ),
         ],
       ),
     );
-}
-
+  }
 
   @override
   Widget build(BuildContext context) {
