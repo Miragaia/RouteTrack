@@ -1,18 +1,71 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:routertrack/dto/route_with_points_dto.dart';
 
-class RouteTimeline extends StatelessWidget {
-
+class RouteTimeline extends StatefulWidget {
   const RouteTimeline({super.key, required this.routesWithPoints});
 
   final List<RouteWithPoints> routesWithPoints;
 
   @override
+  State<RouteTimeline> createState() => _RouteTimelineState();
+}
+
+class _RouteTimelineState extends State<RouteTimeline> {
+  late MqttServerClient mqttClient;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectToMQTTBroker();
+  }
+
+  Future<void> _connectToMQTTBroker() async {
+    mqttClient = MqttServerClient('broker.hivemq.com', 'smartphone_trip_sender');
+    mqttClient.port = 1883;
+    mqttClient.keepAlivePeriod = 60;
+    mqttClient.logging(on: true);
+
+    try {
+      await mqttClient.connect();
+    } catch (e) {
+      print('MQTT connection failed: $e');
+      mqttClient.disconnect();
+    }
+  }
+
+  void _sendDataToSmartwatch(RouteWithPoints route) {
+    if (mqttClient.connectionStatus!.state == MqttConnectionState.connected) {
+      final payload = jsonEncode(route.pointsOfInterest.map((point) => {
+        'title': point.title,
+        'description': point.description,
+        'latitude': point.latitude,
+        'longitude': point.longitude,
+      }).toList());
+
+      final builder = MqttClientPayloadBuilder();
+      builder.addString(payload);
+      mqttClient.publishMessage('trip/data', MqttQos.atMostOnce, builder.payload!);
+      print('Data sent to smartwatch');
+    } else {
+      print('Failed to send data: MQTT is not connected');
+    }
+  }
+
+  @override
+  void dispose() {
+    mqttClient.disconnect();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: routesWithPoints.length,
+      itemCount: widget.routesWithPoints.length,
       itemBuilder: (context, index) {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 7.6, horizontal: 24),
@@ -35,7 +88,7 @@ class RouteTimeline extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        "Titulo",
+                        "Title",
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -44,11 +97,10 @@ class RouteTimeline extends StatelessWidget {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          // Add functionality to send data here
-                          print("Data sent to smartphone");
+                          _sendDataToSmartwatch(widget.routesWithPoints[index]);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green, // Customize button color if needed
+                          backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -82,10 +134,10 @@ class RouteTimeline extends StatelessWidget {
                       ),
                     ),
                   ),
-                  currentStep: routesWithPoints[index].pointsOfInterest.length - 1,
+                  currentStep: widget.routesWithPoints[index].pointsOfInterest.length - 1,
                   type: StepperType.vertical, // Make it vertical like a timeline
                   onStepTapped: (int index){},
-                  steps: routesWithPoints[index].pointsOfInterest.indexed.map((item) {
+                  steps: widget.routesWithPoints[index].pointsOfInterest.indexed.map((item) {
                     final (index, entry) = item;
 
                     return Step(

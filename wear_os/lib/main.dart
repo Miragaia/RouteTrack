@@ -131,6 +131,7 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
       setState(() {
         trip = Trip.fromJson(jsonData);
       });
+      print('Trip initialized with ${trip?.points.length} points');
     } catch (e) {
       print('Error parsing trip data: $e');
     }
