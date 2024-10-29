@@ -25,17 +25,42 @@ class RouteTimeline extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(
+                Padding(
+                  padding: const EdgeInsets.only(
                     top: 39,
                     left: 15,
                     right: 15,
                   ),
-                  child: Text("Titulo", style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  )),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Titulo",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Add functionality to send data here
+                          print("Data sent to smartphone");
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green, // Customize button color if needed
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          "Send Data",
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Stepper(
                   physics: const NeverScrollableScrollPhysics(),
