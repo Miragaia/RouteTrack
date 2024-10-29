@@ -178,7 +178,7 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Trip Tracker')),
+      appBar: AppBar(centerTitle: true, title: const Text('Trip Tracker')),
       body: Column(
         children: [
           Expanded(
