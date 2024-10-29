@@ -6,6 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:routertrack/bloc/search_location_bloc.dart';
 import 'package:routertrack/widgets/route_bottom_sheet.dart';
 
+import '../location/determine_position.dart';
+
 
 class RoutesMap extends StatefulWidget{
   const RoutesMap({
@@ -31,34 +33,6 @@ class _RoutesMapState extends State<RoutesMap> {
     target: LatLng(49.647714, 4.180428),
     zoom: 4.2,
   );
-
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
-  }
 
   @override
   void initState() {
@@ -105,7 +79,7 @@ class _RoutesMapState extends State<RoutesMap> {
         )));
       },
       child: FutureBuilder(
-          future: _determinePosition(),
+          future: determinePosition(),
           builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
             CameraPosition kCurrentPosition;
             if (snapshot.hasData){

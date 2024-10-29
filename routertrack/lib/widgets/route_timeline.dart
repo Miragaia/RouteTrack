@@ -38,6 +38,7 @@ class RouteTimeline extends StatelessWidget {
                   )),
                 ),
                 Stepper(
+                  physics: const NeverScrollableScrollPhysics(),
                   key: Key(Random.secure().nextDouble().toString()), // needs to be constant to be clicked
                   stepIconBuilder: (stepIndex, stepState) => Container(
                     width: 30,
