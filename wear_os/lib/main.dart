@@ -1,10 +1,32 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'dart:math' as math;
 
 void main() {
   runApp(const WearOSApp());
+}
+
+// Models for Trip and Point
+class Point {
+  final String title;
+  final String description;
+  final double latitude;
+  final double longitude;
+  bool visited = false;
+
+  Point({
+    required this.title,
+    required this.description,
+    required this.latitude,
+    required this.longitude,
+  });
+}
+
+class Trip {
+  final List<Point> points;
+
+  Trip(this.points);
 }
 
 class WearOSApp extends StatelessWidget {
@@ -13,91 +35,169 @@ class WearOSApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Wear OS Bluetooth',
+      title: 'Trip Tracker',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const BluetoothListenerPage(),
+      home: const TripTrackerPage(),
     );
   }
 }
 
-class BluetoothListenerPage extends StatefulWidget {
-  const BluetoothListenerPage({Key? key}) : super(key: key);
+class TripTrackerPage extends StatefulWidget {
+  const TripTrackerPage({Key? key}) : super(key: key);
 
   @override
-  _BluetoothListenerPageState createState() => _BluetoothListenerPageState();
+  _TripTrackerPageState createState() => _TripTrackerPageState();
 }
 
-class _BluetoothListenerPageState extends State<BluetoothListenerPage> {
-  BluetoothDevice? connectedDevice;
-  bool isScanning = false;
+class _TripTrackerPageState extends State<TripTrackerPage> {
+  static const platform = MethodChannel('location_permission');
+  static const eventChannel = EventChannel('location_updates');
+  Trip? trip;
+  StreamSubscription<dynamic>? locationStream;
+  final double proximityThreshold = 50.0;
 
   @override
   void initState() {
     super.initState();
-    _requestPermissions();
+    _initializeTrip();
+    _startLocationUpdates();
   }
 
-  void _requestPermissions() async {
-    if (await Permission.bluetooth.isDenied) {
-      await Permission.bluetooth.request();
-    }
-    if (await Permission.location.isDenied) {
-      await Permission.location.request();
-    }
-    _startListeningForConnectPrompt();
+  @override
+  void dispose() {
+    locationStream?.cancel();
+    super.dispose();
   }
 
-  // Continuously check for a connected device from FlutterBluePlus
-  void _startListeningForConnectPrompt() async {
-    print('Listening for connection prompt...');
-    setState(() {
-      isScanning = true; // Show scanning status in the UI
-    });
-
-    _scanForDevices();
+  void _initializeTrip() {
+    trip = Trip([
+      Point(
+        title: "Point 1",
+        description: "A beautiful park",
+        latitude: 40.6309,
+        longitude: -8.6445,
+      ),
+      Point(
+        title: "Point 2",
+        description: "Historic landmark",
+        latitude: 37.8044,
+        longitude: -122.2711,
+      ),
+      Point(
+        title: "Point 2",
+        description: "Historic landmark2",
+        latitude: 40.8044,
+        longitude: -122.2711,
+      ),
+      // Add more points as needed
+    ]);
   }
 
-  // Periodically check for connected devices
-  void _scanForDevices() async {
-    while (connectedDevice == null) {
-      try {
-        // Await the list of connected devices
-        final List<BluetoothDevice> devices = await FlutterBluePlus.systemDevices([]);
-
-        if (devices.isNotEmpty) {
-          setState(() {
-            connectedDevice = devices.first;
-            isScanning = false; // Stop showing scanning status in the UI
-          });
-          print('Device found and connected: ${connectedDevice!.platformName}');
-        } else {
-          print('No devices connected yet. Retrying...');
-          await Future.delayed(const Duration(seconds: 2)); // Wait for 2 seconds before retrying
-        }
-      } catch (e) {
-        print('Error while fetching connected devices: $e');
-        setState(() {
-          isScanning = false; // Stop scanning on error
+  Future<void> _startLocationUpdates() async {
+    try {
+      await platform.invokeMethod('requestPermission');
+      final bool permissionGranted = await platform.invokeMethod('checkPermission');
+      if (permissionGranted) {
+        locationStream = eventChannel.receiveBroadcastStream().listen((event) {
+          List<double> coords = _parseCoordinates(event);
+          print("Coordinates: $coords");
+          _checkProximityToPoints(coords[0], coords[1]);
         });
-        break;
+      }
+    } on PlatformException catch (e) {
+      print("Failed to start location updates: '${e.message}'.");
+    }
+  }
+
+  List<double> _parseCoordinates(dynamic event) {
+    var parts = (event as String).split(" ");
+    return [double.parse(parts[0]), double.parse(parts[1])];
+  }
+
+  void _checkProximityToPoints(double latitude, double longitude) {
+    for (var point in trip!.points) {
+      if (!point.visited) {
+        double distance = _calculateDistance(latitude, longitude, point.latitude, point.longitude);
+        print('Distance to ${point.title}: $distance meters');
+
+        if (distance <= proximityThreshold) {
+          setState(() {
+            point.visited = true;
+          });
+          _showNearbyNotification(point);
+        }
       }
     }
   }
 
+  double _calculateDistance(double startLat, double startLng, double endLat, double endLng) {
+    const double earthRadius = 6371000; // meters
+    double dLat = (endLat - startLat) * (math.pi / 180.0);
+    double dLng = (endLng - startLng) * (math.pi / 180.0);
+
+    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(startLat * (math.pi / 180.0)) *
+            math.cos(endLat * (math.pi / 180.0)) *
+            math.sin(dLng / 2) * math.sin(dLng / 2);
+
+    return earthRadius * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+  }
+
+  void _showNearbyNotification(Point point) {
+    print('You are near ${point.title}: ${point.description}');
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(
+          'Nearby Point',
+          style: const TextStyle(fontSize: 16), // Smaller title text
+        ),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 250), // Constrain width for smaller screens
+          child: Text(
+            'You are near ${point.title}: ${point.description}',
+            style: const TextStyle(fontSize: 14), // Smaller content text
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontSize: 14), // Smaller button text
+            ),
+          ),
+        ],
+      ),
+    );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bluetooth Listener (Wear OS)'),
-      ),
-      body: Center(
-        child: connectedDevice != null
-            ? Text('Connected to: ${connectedDevice!.platformName}')
-            : isScanning
-                ? const Text('Scanning for devices...')
-                : const Text('Waiting for connection prompt...'),
+      appBar: AppBar(centerTitle: true, title: const Text('Trip Tracker')),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: trip?.points.length ?? 0,
+              itemBuilder: (context, index) {
+                final point = trip!.points[index];
+                return ListTile(
+                  title: Text(point.title),
+                  subtitle: Text(point.description),
+                  trailing: Icon(
+                    point.visited ? Icons.check_circle : Icons.location_on,
+                    color: point.visited ? Colors.green : Colors.grey,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

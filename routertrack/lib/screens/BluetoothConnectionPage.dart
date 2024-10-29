@@ -1,8 +1,7 @@
 import 'dart:typed_data';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:routertrack/screens/SendLocationPage.dart';
 
 class BluetoothConnectionPage extends StatefulWidget {
   @override
@@ -13,6 +12,7 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
   BluetoothDevice? connectedDevice;
   List<ScanResult> scanResults = [];
   List<BluetoothDevice> alreadyConnectedDevices = [];
+  StreamSubscription<List<int>>? _notificationSubscription;
 
   @override
   void initState() {
@@ -20,21 +20,23 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
     _getConnectedDevices();
   }
 
-  // Method to get already connected Bluetooth devices
   void _getConnectedDevices() async {
     List<BluetoothDevice> devices = await FlutterBluePlus.connectedDevices;
-    print('Already connected devices: $devices');
     setState(() {
       alreadyConnectedDevices = devices;
     });
   }
 
   @override
+  void dispose() {
+    _notificationSubscription?.cancel(); // cleanup on dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Connect to Smartwatch'),
-      ),
+      appBar: AppBar(title: Text('Connect to Smartwatch')),
       body: Column(
         children: [
           ElevatedButton(
@@ -42,11 +44,7 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
               setState(() {
                 scanResults.clear();
               });
-
-              // Start scanning for Bluetooth devices
               FlutterBluePlus.startScan(timeout: Duration(seconds: 10));
-
-              // Listen to scan results
               FlutterBluePlus.scanResults.listen((results) {
                 setState(() {
                   scanResults = results;
@@ -55,7 +53,6 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
             },
             child: Text('Scan for Smartwatch'),
           ),
-
           if (alreadyConnectedDevices.isNotEmpty)
             Column(
               children: [
@@ -73,8 +70,7 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
                 ),
               ],
             ),
-            if (connectedDevice == null)
-            // Display scanned devices
+          if (connectedDevice == null)
             Expanded(
               child: ListView.builder(
                 itemCount: scanResults.length,
@@ -92,7 +88,6 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
                 },
               ),
             ),
-
           if (connectedDevice != null)
             Column(
               children: [
@@ -100,6 +95,14 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
                 ElevatedButton(
                   onPressed: _disconnect,
                   child: Text('Disconnect'),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    Uint8List data = Uint8List.fromList([0x01, 0x02, 0x03, 0x04]);
+                    await _sendDataToDevice(data);
+                  },
+                  child: Text('Send Data to Smartwatch'),
                 ),
               ],
             ),
@@ -112,23 +115,48 @@ class _BluetoothConnectionPageState extends State<BluetoothConnectionPage> {
     try {
       await device.connect(autoConnect: false);
       setState(() {
-        connectedDevice = device;  
+        connectedDevice = device;
       });
-
       print('Connected to ${device.platformName}');
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SendLocationPage(device: connectedDevice!),
-        ),
-      );
     } catch (e) {
       print('Error connecting to device: $e');
     }
   }
 
+  Future<void> _sendDataToDevice(Uint8List data) async {
+    if (connectedDevice != null) {
+      try {
+        List<BluetoothService> services = await connectedDevice!.discoverServices();
+        for (BluetoothService service in services) {
+          for (BluetoothCharacteristic characteristic in service.characteristics) {
+            if (characteristic.properties.write || characteristic.properties.writeWithoutResponse){
+              print('Found writable characteristic: ${characteristic.uuid}');
+              
+              // Start listening to notifications
+              await characteristic.setNotifyValue(true);
+              print ('Listening to notifications from smartwatch ${characteristic.properties.notify}');
+              _notificationSubscription = characteristic.onValueReceived.listen((value) {
+                print('Received data from smartwatch: $value');
+              });
+
+              // Send data to the smartwatch
+              await characteristic.write(data, allowLongWrite: true);
+              print('Data sent to smartwatch: $data');
+              return;
+            }
+          }
+        }
+        print('No writable characteristic found');
+      } catch (e) {
+        print('Error sending data: $e');
+      }
+    } else {
+      print('No device connected');
+    }
+  }
+
   void _disconnect() async {
+    await _notificationSubscription?.cancel();
     await connectedDevice?.disconnect();
     setState(() {
       connectedDevice = null;

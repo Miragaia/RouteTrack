@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:routertrack/screens/map.dart';
-import 'package:routertrack/screens/route_screen.dart';
 import 'package:routertrack/widgets/stores_map.dart'; // Assuming StoresMap is your map screen
 
 class HomePage extends StatelessWidget {
@@ -68,41 +67,30 @@ class HomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        // Navigate to StoresMap page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RouteScreen(),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(24.0), // Increase padding
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.map,
-                                size: 100, // Bigger icon
-                                color: Colors.green,
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(24.0), // Increase padding
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.map,
+                              size: 100, // Bigger icon
+                              color: Colors.green,
+                            ),
+                            SizedBox(height: 20), // More spacing between icon and text
+                            Text(
+                              'SHOW TRIPS',
+                              style: TextStyle(
+                                fontSize: 26, // Bigger text
+                                fontWeight: FontWeight.bold,
                               ),
-                              SizedBox(height: 20), // More spacing between icon and text
-                              Text(
-                                'SHOW TRIPS',
-                                style: TextStyle(
-                                  fontSize: 26, // Bigger text
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
