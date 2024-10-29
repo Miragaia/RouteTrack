@@ -76,13 +76,19 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
       Point(
         title: "Point 1",
         description: "A beautiful park",
-        latitude: 40.6799,
-        longitude: -7.9248,
+        latitude: 40.6309,
+        longitude: -8.6445,
       ),
       Point(
         title: "Point 2",
         description: "Historic landmark",
         latitude: 37.8044,
+        longitude: -122.2711,
+      ),
+      Point(
+        title: "Point 2",
+        description: "Historic landmark2",
+        latitude: 40.8044,
         longitude: -122.2711,
       ),
       // Add more points as needed
@@ -144,17 +150,30 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Nearby Point'),
-        content: Text('You are near ${point.title}: ${point.description}'),
+        title: Text(
+          'Nearby Point',
+          style: const TextStyle(fontSize: 16), // Smaller title text
+        ),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 250), // Constrain width for smaller screens
+          child: Text(
+            'You are near ${point.title}: ${point.description}',
+            style: const TextStyle(fontSize: 14), // Smaller content text
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontSize: 14), // Smaller button text
+            ),
           ),
         ],
       ),
     );
-  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -176,14 +195,6 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
                   ),
                 );
               },
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'Approach each point to mark it as visited!',
-              style: TextStyle(fontSize: 16),
             ),
           ),
         ],
