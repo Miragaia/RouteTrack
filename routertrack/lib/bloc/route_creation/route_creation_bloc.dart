@@ -11,7 +11,7 @@ class RouteCreationBloc extends Bloc<RouteEvent, RouteState>{
   RouteCreationBloc({
     required this.routeRepository,
     required this.routePersistenceRepository
-  }) : super(RouteStateCreated(routeRepository.routeItemEntries)) {
+  }) : super(RouteStateCreated(routeRepository.routeItemEntries, routeRepository.routeItemEntries.last)) {
     on<RouteStarted>(_onRouteStarted);
     on<RouteEntryAdded>(_onRouteEntryAdded);
     on<RouteEntryRemoved>(_onRouteEntryRemoved);
@@ -31,8 +31,9 @@ class RouteCreationBloc extends Bloc<RouteEvent, RouteState>{
       emit(RouteStateRepeated(routeRepository.routeItemEntries, firstRepeated));
       return;
     }
-    routeRepository.addRouteItemEntry(RouteItemEntry(event.routeItem));
-    emit(RouteStateCreated(routeRepository.routeItemEntries));
+    RouteItemEntry newRouteItemEntry = RouteItemEntry(event.routeItem);
+    routeRepository.addRouteItemEntry(newRouteItemEntry);
+    emit(RouteStateCreated(routeRepository.routeItemEntries, newRouteItemEntry));
   }
 
   void _onRouteEntryRemoved(RouteEntryRemoved event, Emitter<RouteState> emit) {

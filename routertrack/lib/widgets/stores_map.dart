@@ -1,3 +1,7 @@
+import 'package:routertrack/bloc/route_creation/route_creation_bloc.dart';
+import 'package:routertrack/bloc/route_creation/route_creation_state.dart';
+import 'package:routertrack/repository/route_repository.dart';
+import 'package:uuid/uuid.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:routertrack/bloc/search_location_bloc.dart';
 import 'package:routertrack/widgets/route_bottom_sheet.dart';
 
+import '../dto/route_item_dto.dart';
 import '../location/determine_position.dart';
 
 
@@ -19,11 +24,12 @@ class RoutesMap extends StatefulWidget{
 }
 
 class _RoutesMapState extends State<RoutesMap> {
+  Uuid uuid = const Uuid();
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   late GoogleMapController _googleMapController;
   final ClusterManagerId clusterManagerId = const ClusterManagerId("stores");
   late ClusterManager clusterManager;
-  final Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   late SearchLocationBloc searchLocationBloc;
   // Getting the following error
   bool isButtonVisible = false;
@@ -57,26 +63,52 @@ class _RoutesMapState extends State<RoutesMap> {
 
   @override
   Widget build(BuildContext context) {
-
-    BlocListener<SearchLocationBloc, LatLng> (
-      listener: (context, state) {
-        print("callbacking this $state");
-        _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-          bearing: 0,
-          target: state,
-          zoom: 17.0,
-        )));
+    return BlocListener<RouteCreationBloc, RouteState>(
+      listenWhen: (previousState, state) {
+        return [RouteStateCreated, RouteStateCleared].contains(state.runtimeType);
       },
-    );
-
-    return BlocListener<SearchLocationBloc, LatLng>(
       listener: (context, state) {
-        print("callbacking this $state");
-        _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-          bearing: 0,
-          target: state,
-          zoom: 17.0,
-        )));
+        if (state is RouteStateCreated){
+          RouteItemDTO routeItemDTO = state.lastAddedEntry.routeItem;
+          LatLng routeItemLatLng = LatLng(routeItemDTO.latitude, routeItemDTO.longitude);
+          MarkerId markerId = MarkerId(uuid.v4());
+          markers[markerId] = Marker(
+            markerId: markerId,
+            position: routeItemLatLng,
+            icon: BitmapDescriptor.defaultMarker,
+            infoWindow: InfoWindow(
+              title: routeItemDTO.title,
+              snippet: routeItemDTO.description,
+            ),
+          );
+          LatLngBounds _createBounds(List<LatLng> positions) {
+            final southwestLat = positions.map((p) => p.latitude).reduce((value, element) => value < element ? value : element); // smallest
+            final southwestLon = positions.map((p) => p.longitude).reduce((value, element) => value < element ? value : element);
+            final northeastLat = positions.map((p) => p.latitude).reduce((value, element) => value > element ? value : element); // biggest
+            final northeastLon = positions.map((p) => p.longitude).reduce((value, element) => value > element ? value : element);
+            final latRange = northeastLat - southwestLat;
+            return LatLngBounds(
+                southwest: LatLng(southwestLat - latRange, southwestLon),
+                northeast: LatLng(northeastLat, northeastLon)
+            );
+          }
+          LatLngBounds _bounds(Set<Marker> markers) {
+            return _createBounds(markers.map((m) => m.position).toList());
+          }
+          markers = Map<MarkerId, Marker>.from(markers);
+          _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
+            _bounds(markers.values.toSet()), 50
+          ));
+
+          // _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          //   bearing: 0,
+          //   target: routeItemLatLng,
+          //   zoom: 17.0,
+          // )));
+        } else if (state is RouteStateCleared){
+          markers = <MarkerId, Marker>{};
+        }
+        setState(() {});
       },
       child: FutureBuilder(
           future: determinePosition(),

@@ -13,7 +13,11 @@ sealed class RouteState extends Equatable {
 }
 
 final class RouteStateCreated extends RouteState {
-  const RouteStateCreated(super.pointsOfInterestLinkedList);
+  const RouteStateCreated(super.pointsOfInterestLinkedList, this.lastAddedEntry);
+  final RouteItemEntry lastAddedEntry;
+
+  @override
+  List<Object> get props => [routeItemEntries.iterator, lastAddedEntry];
 }
 
 final class RouteStateRepeated extends RouteState {

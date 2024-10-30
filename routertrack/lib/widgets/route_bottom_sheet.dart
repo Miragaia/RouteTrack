@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
@@ -8,6 +9,7 @@ import 'package:routertrack/widgets/stepper_timeline.dart';
 import '../bloc/route_creation/route_creation_bloc.dart';
 import '../bloc/route_creation/route_creation_events.dart';
 import '../bloc/search_location_bloc.dart';
+import '../location/determine_position.dart';
 import 'CustomElevatedButton.dart';
 
 class RouteBottomSheet extends StatefulWidget {
@@ -48,7 +50,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final RouteCreationBloc _routeCreationBloc = BlocProvider.of<RouteCreationBloc>(context);
+    final RouteCreationBloc routeCreationBloc = BlocProvider.of<RouteCreationBloc>(context);
 
     return Stack(
       children: [
@@ -91,11 +93,12 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                 children: [
                                   IconButton(
                                     icon: Icon(Icons.my_location_outlined),
-                                    onPressed: () {
-                                      _routeCreationBloc.add(RouteEntryAdded(
+                                    onPressed: () async {
+                                      Position position = await determinePosition();
+                                      routeCreationBloc.add(RouteEntryAdded(
                                           routeItem: RouteItemDTO(
-                                            title: "name",
-                                            description: "Portugal",
+                                            title: "Point",
+                                            description: "Your current location: ${position.latitude}, ${position.longitude}",
                                             latitude: 1,
                                             longitude: 2,
                                           )
@@ -119,7 +122,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                           getPlaceDetailWithLatLng: (Prediction prediction) {
                             String name = prediction.description?.split(", ").first ?? "";
                             String country = prediction.description ?? "";
-                            _routeCreationBloc.add(RouteEntryAdded(
+                            routeCreationBloc.add(RouteEntryAdded(
                                 routeItem: RouteItemDTO(
                                   title: name,
                                   description: country,
@@ -189,7 +192,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                             const Spacer(),
                             ElevatedButton.icon(
                               onPressed: () {
-                                _routeCreationBloc.add(RouteEntryClear());
+                                routeCreationBloc.add(RouteEntryClear());
                               },
                               icon: const Icon(Icons.delete_rounded),
                               label: const Text('Clear'),
@@ -220,7 +223,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
               child: CustomElevatedButton(
                 text: "Optimize",
                 onPressed: () {
-                  _routeCreationBloc.add(RoutePersisted());
+                  routeCreationBloc.add(RoutePersisted());
                 },
               ),
             ),
