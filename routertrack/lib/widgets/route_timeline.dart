@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:routertrack/dto/route_with_points_dto.dart';
+import 'package:routertrack/widgets/generated_qr_code_dialog.dart';
 
 class RouteTimeline extends StatefulWidget {
   const RouteTimeline({super.key, required this.routesWithPoints});
@@ -95,22 +96,45 @@ class _RouteTimelineState extends State<RouteTimeline> {
                           color: Colors.green,
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _sendDataToSmartwatch(widget.routesWithPoints[index]);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Row(
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () => qrCodeDialogBuilder(
+                              context,
+                              jsonEncode(widget.routesWithPoints[index])
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(Icons.qr_code, color: Colors.white),
+                            label: const Text(
+                              "Share QR",
+                              style: TextStyle(fontSize: 14, color: Colors.white),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          "Send Data",
-                          style: TextStyle(fontSize: 14, color: Colors.white),
-                        ),
-                      ),
+                          SizedBox(width: 10,),
+                          ElevatedButton(
+                            onPressed: () {
+                              _sendDataToSmartwatch(widget.routesWithPoints[index]);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              "Send Data",
+                              style: TextStyle(fontSize: 14, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),

@@ -48,6 +48,8 @@ dependencies:
   drift_flutter: ^0.2.1
   equatable: ^2.0.5
   mqtt_client: ^10.5.1
+  qr_flutter: ^4.1.0
+  qr_code_scanner_plus: ^2.0.6
 
 dev_dependencies:
   flutter_test:

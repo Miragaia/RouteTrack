@@ -44,5 +44,11 @@ class RouteCreationRepository {
     }
   }
 
+  void replaceAllRouteItemEntries(List<RouteItemEntry> newRouteItemEntries) {
+    routeItemEntries.clear();
+    for (RouteItemEntry routeItemEntry in newRouteItemEntries){
+      routeItemEntries.add(routeItemEntry);
+    }
+  }
 
 }

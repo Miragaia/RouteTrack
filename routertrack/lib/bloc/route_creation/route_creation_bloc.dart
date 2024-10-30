@@ -16,6 +16,7 @@ class RouteCreationBloc extends Bloc<RouteEvent, RouteState>{
     on<RouteEntryAdded>(_onRouteEntryAdded);
     on<RouteEntryRemoved>(_onRouteEntryRemoved);
     on<RouteEntryClear>(_onRouteEntryClear);
+    on<RouteSubstituted>(_onRouteSubstituted);
     on<RoutePersisted>(_onRoutePersisted);
   }
 
@@ -43,6 +44,18 @@ class RouteCreationBloc extends Bloc<RouteEvent, RouteState>{
   void _onRouteEntryClear(RouteEntryClear event, Emitter<RouteState> emit) {
     routeRepository.clearIntermediateRouteItemEntries();
     emit(RouteStateCleared(routeRepository.routeItemEntries));
+  }
+
+  void _onRouteSubstituted(RouteSubstituted event, Emitter<RouteState> emit){
+    routeRepository.replaceAllRouteItemEntries(
+      event.routeItemEntries
+          .map((routeItemDTO) => RouteItemEntry(routeItemDTO))
+          .toList()
+    );
+    emit(RouteStateCreated(
+        routeRepository.routeItemEntries,
+        routeRepository.routeItemEntries.last
+    ));
   }
 
   void _onRoutePersisted(RoutePersisted event, Emitter<RouteState> emit) {

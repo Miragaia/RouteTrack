@@ -15,6 +15,15 @@ class RouteItemDTO extends Equatable{
     required this.longitude,
   });
 
+  static RouteItemDTO fromPointsOfInterestEntity(PointsOfInterest entity) {
+    return RouteItemDTO(
+      title: entity.title,
+      description: entity.description,
+      latitude: entity.latitude,
+      longitude: entity.longitude,
+    );
+  }
+
   PointsOfInterestsCompanion toPointsOfInterestEntity() {
     return PointsOfInterestsCompanion.insert(
       title: title,

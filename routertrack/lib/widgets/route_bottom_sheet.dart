@@ -4,7 +4,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:routertrack/dto/route_item_dto.dart';
+import 'package:routertrack/widgets/qr_code_scanner_dialog.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
 import '../bloc/route_creation/route_creation_bloc.dart';
 import '../bloc/route_creation/route_creation_events.dart';
@@ -26,6 +28,9 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
   bool _isVisible = false;
   late SearchLocationBloc searchLocationBloc;
   List<bool> _selectedTransports = [true, false, false];
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
+
 
   @override
   void initState() {
@@ -99,8 +104,8 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                           routeItem: RouteItemDTO(
                                             title: "Point",
                                             description: "Your current location: ${position.latitude}, ${position.longitude}",
-                                            latitude: 1,
-                                            longitude: 2,
+                                            latitude: position.latitude,
+                                            longitude: position.longitude,
                                           )
                                       ));
                                     },
@@ -108,7 +113,12 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                   IconButton(
                                     icon: Icon(Icons.qr_code),
                                     onPressed: () {
-
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return const QrViewDialog();
+                                        },
+                                      );
                                     },
                                   ),
 

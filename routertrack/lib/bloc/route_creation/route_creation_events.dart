@@ -32,5 +32,13 @@ final class RouteEntryClear extends RouteEvent {
   List<Object?> get props => [];
 }
 
+final class RouteSubstituted extends RouteEvent {
+  RouteSubstituted({required this.routeItemEntries});
+  final List<RouteItemDTO> routeItemEntries;
+
+  @override
+  List<Object?> get props => [routeItemEntries];
+}
+
 final class RoutePersisted extends RouteEvent {}
 
