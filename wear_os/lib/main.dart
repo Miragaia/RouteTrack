@@ -70,10 +70,11 @@ class TripTrackerPage extends StatefulWidget {
 class _TripTrackerPageState extends State<TripTrackerPage> {
   static const platform = MethodChannel('location_permission');
   static const eventChannel = EventChannel('location_updates');
-  final double proximityThreshold = 10.0;
+  final double proximityThreshold = 50.0;
   Trip? trip;
   StreamSubscription<dynamic>? locationStream;
   late MqttServerClient mqttClient;
+  String directionStatus = 'Direction: Unknown';
 
   @override
   void initState() {
@@ -159,16 +160,22 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
   }
 
   void _checkProximityToPoints(double latitude, double longitude) {
+    bool offRoute = false;
+
     for (var i = 0; i < (trip?.points.length ?? 0) - 1; i++) {
       var start = trip!.points[i];
       var end = trip!.points[i + 1];
 
       double distanceToLine = _calculateDistanceToLine(latitude, longitude, start, end);
       if (distanceToLine > proximityThreshold) {
-        _showWrongDirectionNotification();
+        offRoute = true;
         break;
       }
     }
+
+    setState(() {
+      directionStatus = offRoute ? 'Wrong Direction' : 'Correct Direction';
+    });
 
     for (var point in trip?.points ?? []) {
       if (!point.visited) {
@@ -179,7 +186,6 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
           setState(() {
             point.visited = true;
           });
-          _showNearbyNotification(point);
         }
       }
     }
@@ -219,52 +225,6 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
     return earthRadius * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
   }
 
-  void _showNearbyNotification(Point point) {
-    print('You are near ${point.title}: ${point.description}');
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Nearby Point', style: TextStyle(fontSize: 16)),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 250),
-          child: Text(
-            'You are near ${point.title}: ${point.description}',
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(fontSize: 14)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showWrongDirectionNotification() {
-    print('Você está se desviando da rota!');
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Direção Incorreta', style: TextStyle(fontSize: 16)),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 250),
-          child: const Text(
-            'Você está se afastando da rota planejada. Volte para o caminho correto.',
-            style: TextStyle(fontSize: 14),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar', style: TextStyle(fontSize: 14)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -285,6 +245,20 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
                   ),
                 );
               },
+            ),
+          ),
+          Container(
+            color: directionStatus == 'Correct Direction' ? Colors.green : Colors.red,
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text(
+                directionStatus,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
