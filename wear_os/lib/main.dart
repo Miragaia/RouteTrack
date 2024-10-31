@@ -192,7 +192,7 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
   }
 
   double _calculateDistanceToLine(double lat, double lon, Point start, Point end) {
-    const double earthRadius = 6371000; // em metros
+    const double earthRadius = 6371000; // meters
 
     double startLatRad = start.latitude * (math.pi / 180);
     double startLngRad = start.longitude * (math.pi / 180);
@@ -231,6 +231,20 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
       appBar: AppBar(centerTitle: true, title: const Text('Trip Tracker')),
       body: Column(
         children: [
+          Container(
+            color: directionStatus == 'Correct Direction' ? Colors.green : Colors.red,
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text(
+                directionStatus,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: trip?.points.length ?? 0,
@@ -245,20 +259,6 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
                   ),
                 );
               },
-            ),
-          ),
-          Container(
-            color: directionStatus == 'Correct Direction' ? Colors.green : Colors.red,
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: Text(
-                directionStatus,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             ),
           ),
         ],
