@@ -70,7 +70,7 @@ class TripTrackerPage extends StatefulWidget {
 class _TripTrackerPageState extends State<TripTrackerPage> {
   static const platform = MethodChannel('location_permission');
   static const eventChannel = EventChannel('location_updates');
-  final double proximityThreshold = 50.0;
+  final double proximityThreshold = 10.0;
   Trip? trip;
   StreamSubscription<dynamic>? locationStream;
   late MqttServerClient mqttClient;
@@ -159,6 +159,17 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
   }
 
   void _checkProximityToPoints(double latitude, double longitude) {
+    for (var i = 0; i < (trip?.points.length ?? 0) - 1; i++) {
+      var start = trip!.points[i];
+      var end = trip!.points[i + 1];
+
+      double distanceToLine = _calculateDistanceToLine(latitude, longitude, start, end);
+      if (distanceToLine > proximityThreshold) {
+        _showWrongDirectionNotification();
+        break;
+      }
+    }
+
     for (var point in trip?.points ?? []) {
       if (!point.visited) {
         double distance = _calculateDistance(latitude, longitude, point.latitude, point.longitude);
@@ -172,6 +183,27 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
         }
       }
     }
+  }
+
+  double _calculateDistanceToLine(double lat, double lon, Point start, Point end) {
+    const double earthRadius = 6371000; // em metros
+
+    double startLatRad = start.latitude * (math.pi / 180);
+    double startLngRad = start.longitude * (math.pi / 180);
+    double endLatRad = end.latitude * (math.pi / 180);
+    double endLngRad = end.longitude * (math.pi / 180);
+    double latRad = lat * (math.pi / 180);
+    double lonRad = lon * (math.pi / 180);
+
+    double d1 = _calculateDistance(start.latitude, start.longitude, lat, lon);
+    double d2 = _calculateDistance(end.latitude, end.longitude, lat, lon);
+    double d3 = _calculateDistance(start.latitude, start.longitude, end.latitude, end.longitude);
+
+    double s = (d1 + d2 + d3) / 2;
+    double area = math.sqrt(s * (s - d1) * (s - d2) * (s - d3));
+    double distanceToLine = (2 * area) / d3;
+
+    return distanceToLine;
   }
 
   double _calculateDistance(double startLat, double startLng, double endLat, double endLng) {
@@ -210,6 +242,29 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
     );
   }
 
+  void _showWrongDirectionNotification() {
+    print('Você está se desviando da rota!');
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Direção Incorreta', style: TextStyle(fontSize: 16)),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 250),
+          child: const Text(
+            'Você está se afastando da rota planejada. Volte para o caminho correto.',
+            style: TextStyle(fontSize: 14),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar', style: TextStyle(fontSize: 14)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,7 +280,7 @@ class _TripTrackerPageState extends State<TripTrackerPage> {
                   title: Text(point.title),
                   subtitle: Text(point.description),
                   trailing: Icon(
-                    point.visited ? Icons.check_circle : Icons.location_on,
+                    point.visited ? Icons.check_circle : Icons.radio_button_unchecked,
                     color: point.visited ? Colors.green : Colors.grey,
                   ),
                 );
