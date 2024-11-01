@@ -45,7 +45,7 @@ class Notif {
       NotificationDetails notificationDetails = NotificationDetails(android: androidNotificationDetails);
       await fnp.show(
           counter++,
-          "Routertrack",
+          "RouteTrack",
           "Downloaded $routeName!",
           notificationDetails,
           payload: routeFilename
