@@ -1,6 +1,5 @@
 import 'dart:collection';
 import '../dto/route_item_dto.dart';
-import '../database/database.dart';
 
 final class RouteItemEntry extends LinkedListEntry<RouteItemEntry>{
   final RouteItemDTO routeItem;
@@ -15,7 +14,6 @@ final class RouteItemEntry extends LinkedListEntry<RouteItemEntry>{
 
 class RouteCreationRepository {
   final LinkedList<RouteItemEntry> routeItemEntries = LinkedList<RouteItemEntry>();
-  AppDatabase database = AppDatabase();
 
   RouteCreationRepository(
       RouteItemDTO origin,
