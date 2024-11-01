@@ -1,5 +1,8 @@
 import 'dart:collection';
+import 'package:geolocator/geolocator.dart';
+
 import '../dto/route_item_dto.dart';
+import '../location/determine_position.dart';
 
 final class RouteItemEntry extends LinkedListEntry<RouteItemEntry>{
   final RouteItemDTO routeItem;
@@ -15,13 +18,40 @@ final class RouteItemEntry extends LinkedListEntry<RouteItemEntry>{
 class RouteCreationRepository {
   final LinkedList<RouteItemEntry> routeItemEntries = LinkedList<RouteItemEntry>();
 
-  RouteCreationRepository(
-      RouteItemDTO origin,
-      RouteItemDTO destination,
-  ) {
-    routeItemEntries.add(RouteItemEntry(origin));
-    routeItemEntries.add(RouteItemEntry(destination));
+  static Future<RouteCreationRepository> create() async {
+    final routeCreationRepository = RouteCreationRepository();
+    await determinePosition()
+      .then((position) {
+        routeCreationRepository.routeItemEntries.add(RouteItemEntry(RouteItemDTO(
+            title: "Origin",
+            description: "Your Current Location: ${position.latitude}, ${position.longitude}",
+            latitude: position.latitude,
+            longitude: position.longitude
+        )));
+        routeCreationRepository.routeItemEntries.add(RouteItemEntry(RouteItemDTO(
+            title: "Destination",
+            description: "Your Current Location ${position.latitude}, ${position.longitude}",
+            latitude: position.latitude,
+            longitude: position.longitude
+        )));
+      }).catchError((error) {
+        routeCreationRepository.routeItemEntries.add(RouteItemEntry(const RouteItemDTO(
+            title: "Origin",
+            description: "Your Current Location: 40.629540, -8.657072",
+            latitude: 40.629540,
+            longitude: -8.657072
+        )));
+        routeCreationRepository.routeItemEntries.add(RouteItemEntry(const RouteItemDTO(
+            title: "Destination",
+            description: "Your Current Location , -8.657072",
+            latitude: 40.629540,
+            longitude: -8.657072
+        )));
+      });
+    return routeCreationRepository;
   }
+
+  RouteCreationRepository();
 
   Stream<RouteItemDTO> getRouteItemEntries() {
     return Stream.fromIterable(routeItemEntries.map((entry) => entry.routeItem));

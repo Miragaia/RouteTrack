@@ -89,6 +89,7 @@ class _RoutesMapState extends State<RoutesMap> {
           RouteStateCreated,
           RouteStateRepeated,
           RouteStateCleared,
+          RouteStatePersisted
         ].contains(state.runtimeType);
       },
       listener: (context, state) async {
@@ -140,6 +141,12 @@ class _RoutesMapState extends State<RoutesMap> {
             content: Text("Route Cleared Successfully!"),
             padding: EdgeInsets.all(20),
             backgroundColor: MyColorPalette.darkGreen,
+          ));
+        } else if (state is RouteStatePersisted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Route Saved Successfully!"),
+              padding: EdgeInsets.all(20),
+              backgroundColor: MyColorPalette.darkGreen,
           ));
         }
         setState(() {});

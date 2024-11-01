@@ -1,45 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:routertrack/repository/database_repository.dart';
 import 'package:routertrack/repository/route_repository.dart';
 import 'package:routertrack/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'bloc/route_creation/route_creation_bloc.dart';
-import 'dto/route_item_dto.dart';
 import 'cubit/routes_cubit/routes_cubit.dart';
-import 'location/determine_position.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  Position position = await determinePosition();
-  runApp(MyApp(position));
+  RouteCreationRepository routeRepository = await RouteCreationRepository.create();
+  RoutePersistenceRepository routePersistenceRepository = RoutePersistenceRepository();
+  runApp(MyApp(
+    routeRepository: routeRepository,
+    routePersistenceRepository: routePersistenceRepository,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  late final RouteCreationRepository routeRepository;
-  late final RoutePersistenceRepository routePersistenceRepository;
+  final RouteCreationRepository routeRepository;
+  final RoutePersistenceRepository routePersistenceRepository;
 
-  MyApp(Position position, {super.key}) {
-     routeRepository = RouteCreationRepository(
-      RouteItemDTO(
-          title: "Origin",
-          description: "Your Current Location: ${position.latitude}, ${position.longitude}",
-          latitude: position.latitude,
-          longitude: position.longitude
-      ),
-      RouteItemDTO(
-          title: "Destination",
-          description: "Your Current Location ${position.latitude}, ${position.longitude}",
-          latitude: position.latitude,
-          longitude: position.longitude
-      ),
-    );
-    routePersistenceRepository = RoutePersistenceRepository();
-  }
+  const MyApp({super.key, required this.routeRepository, required this.routePersistenceRepository});
 
   @override
   Widget build(BuildContext context) {
