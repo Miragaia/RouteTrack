@@ -82,14 +82,6 @@ class _RoutesMapState extends State<RoutesMap> {
       child: FutureBuilder(
           future: determinePosition(),
           builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
-            CameraPosition kCurrentPosition;
-            if (snapshot.hasData){
-              Position? position = snapshot.data;
-              kCurrentPosition = CameraPosition(
-                target: LatLng(position!.latitude, position.longitude),
-                zoom: 14.4746,
-              );
-            }
             return Stack(
                 children: [
                   GoogleMap(

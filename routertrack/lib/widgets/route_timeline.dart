@@ -1,12 +1,21 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
-
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:routertrack/dto/route_with_points_dto.dart';
 import 'package:routertrack/mycolors/colors.dart';
 import 'package:routertrack/widgets/generated_qr_code_dialog.dart';
+import '../notifications/notification.dart';
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
 
 class RouteTimeline extends StatefulWidget {
   const RouteTimeline({super.key, required this.routesWithPoints});
@@ -20,10 +29,12 @@ class RouteTimeline extends StatefulWidget {
 class _RouteTimelineState extends State<RouteTimeline> {
   late MqttServerClient mqttClient;
 
+
   @override
   void initState() {
     super.initState();
     _connectToMQTTBroker();
+    Notif.initNotification(flutterLocalNotificationsPlugin);
   }
 
   Future<void> _connectToMQTTBroker() async {
@@ -100,7 +111,30 @@ class _RouteTimelineState extends State<RouteTimeline> {
                       Row(
                         children: [
                           ElevatedButton(
-                            onPressed: () => {},
+                            onPressed: () async {
+                              final font = await PdfGoogleFonts.nunitoExtraLight();
+                              final pdf = pw.Document();
+                              pdf.addPage(pw.Page(
+                                pageFormat: PdfPageFormat.a4,
+                                build: (pw.Context context) {
+                                  return pw.Center(
+                                    child: pw.Text(
+                                      "Hello World",
+                                      style: pw.TextStyle(font: font, fontSize: 40)
+                                    ),
+                                  ); // Center
+                                }
+                              ));
+                              final output = await getDownloadsDirectory();
+                              final filename = "${output?.path}/route_${index+1}.pdf";
+                              final file = File(filename);
+                              await file.writeAsBytes(await pdf.save());
+                              await Notif.showDownloadNotification(
+                                fnp: flutterLocalNotificationsPlugin,
+                                routeName: "Route ${index + 1}",
+                                routeFilename: filename,
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: MyColorPalette.forestGreen,
                                 padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
@@ -109,7 +143,7 @@ class _RouteTimelineState extends State<RouteTimeline> {
                                 ),
                                 minimumSize: const Size(40, 0)
                             ),
-                            child: const Icon(Icons.download, color: Colors.white,),
+                            child: const Icon(Icons.download, color: Colors.white),
                           ),
                           ElevatedButton(
                             onPressed: () => qrCodeDialogBuilder(

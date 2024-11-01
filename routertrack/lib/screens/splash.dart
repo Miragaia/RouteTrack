@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:routertrack/mycolors/colors.dart';
 import 'package:routertrack/screens/logIn.dart';
 import 'package:routertrack/widgets/CustomImageView.dart';
-import 'package:routertrack/theme/theme.dart';
 import 'package:routertrack/widgets/CustomElevatedButton.dart';
 
 class SplashScreen extends StatelessWidget {
