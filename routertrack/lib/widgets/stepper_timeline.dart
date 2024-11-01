@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:routertrack/mycolors/colors.dart';
 
 import '../bloc/route_creation/route_creation_bloc.dart';
 import '../bloc/route_creation/route_creation_state.dart';
@@ -34,12 +35,16 @@ class _StepperTimelineState extends State<StepperTimeline> {
               height: 30,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: stepState == StepState.complete ? Colors.green : Colors.grey,
+                color: stepState == StepState.complete ? MyColorPalette.forestGreen : Colors.grey,
               ),
               child: Center(
-                child: Text(
-                  'cenas',
-                  style: TextStyle(
+                child: stepIndex == 0 ? const Icon(Icons.home, color: Colors.white, size: 16,) :
+                stepIndex == state.routeItemEntries.length - 1 ?
+                const Icon(Icons.flag, color: Colors.white, size: 16,) :
+                Text(
+                  stepIndex.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -62,16 +67,16 @@ class _StepperTimelineState extends State<StepperTimeline> {
                   children: [
                     Text(
                       entry.routeItem.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         overflow: TextOverflow.ellipsis,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: MyColorPalette.forestGreen,
                       ),
                     ),
                     Text(
                       entry.routeItem.description,
-                      style: TextStyle(
+                      style: const TextStyle(
                         height: 1.2,
                         color: Color.fromARGB(255, 112, 112, 112),
                         fontSize: 11.5,
@@ -81,7 +86,7 @@ class _StepperTimelineState extends State<StepperTimeline> {
                 ),
                 content: Container(
                   alignment: Alignment.centerLeft,
-                  child: SizedBox.shrink(),
+                  child: const SizedBox.shrink(),
                 ),
                 isActive: true,
                 state: StepState.complete,

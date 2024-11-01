@@ -6,6 +6,7 @@ import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:routertrack/dto/route_item_dto.dart';
+import 'package:routertrack/mycolors/colors.dart';
 import 'package:routertrack/widgets/qr_code_scanner_dialog.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
 import '../bloc/route_creation/route_creation_bloc.dart';
@@ -25,9 +26,9 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
   final TextEditingController searchAddressController = TextEditingController();
   final FocusNode _searchAddressFocusNode = FocusNode();
   final DraggableScrollableController _draggableScrollableSheetController = DraggableScrollableController();
-  bool _isVisible = false;
+  bool _isVisible = true;
   late SearchLocationBloc searchLocationBloc;
-  List<bool> _selectedTransports = [true, false, false];
+  final List<bool> _selectedTransports = [true, false, false];
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
 
@@ -151,21 +152,20 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                             searchAddressController.selection = TextSelection.fromPosition(
                                 TextPosition(offset: prediction.description?.length ?? 0));
                           },
-                          seperatedBuilder: Divider(),
+                          seperatedBuilder: const Divider(),
                           containerHorizontalPadding: 10,
 
 
-                          // OPTIONAL// If you want to customize list view item builder
                           itemBuilder: (context, index, Prediction prediction) {
                             return Container(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               child: Row(
                                 children: [
-                                  Icon(Icons.location_on),
-                                  SizedBox(
+                                  const Icon(Icons.location_on),
+                                  const SizedBox(
                                     width: 7,
                                   ),
-                                  Expanded(child: Text("${prediction.description ?? ""}"))
+                                  Expanded(child: Text(prediction.description ?? ""))
                                 ],
                               ),
                             );
@@ -187,16 +187,16 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                   }
                                 });
                               },
+                              borderColor: MyColorPalette.darkGreen,
+                              borderWidth: 0.2,
                               borderRadius: const BorderRadius.all(Radius.circular(8)),
-                              selectedBorderColor: Colors.blue[700],
-                              selectedColor: Colors.white,
-                              fillColor: Colors.blue[200],
-                              color: Colors.blue[400],
+                              selectedBorderColor: MyColorPalette.darkGreen,
+                              fillColor: MyColorPalette.darkGreen,
                               isSelected: _selectedTransports,
                               children: [
-                                Icon(Icons.directions_car_filled_sharp, color: Colors.black),
-                                Icon(Icons.directions_bike_outlined, color: Colors.black),
-                                Icon(Icons.directions_walk_outlined, color: Colors.black),
+                                Icon(Icons.directions_car_filled_sharp, color: _selectedTransports[0] == true ? Colors.white : Colors.black),
+                                Icon(Icons.directions_bike_outlined, color: _selectedTransports[1] == true ? Colors.white : Colors.black),
+                                Icon(Icons.directions_walk_outlined, color: _selectedTransports[2] == true ? Colors.white : Colors.black),
                               ],
                             ),
                             const Spacer(),
@@ -204,8 +204,29 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                               onPressed: () {
                                 routeCreationBloc.add(RouteEntryClear());
                               },
-                              icon: const Icon(Icons.delete_rounded),
-                              label: const Text('Clear'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 13
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                side: const BorderSide(
+                                  color: Color.fromARGB(255, 0, 128, 0),
+                                  width: 0.2,
+                                ),
+                                iconColor: Colors.black,
+                              ),
+                              icon: const Icon(Icons.delete_rounded, size: 22),
+                              label: const Padding(
+                                padding: EdgeInsets.only(
+                                  left: 5,
+                                ),
+                                child: Text('Clear', style: TextStyle(
+                                  color: Colors.black
+                                )),
+                              ),
                               iconAlignment: IconAlignment.end,
                             ),
                           ],
@@ -231,7 +252,25 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
             child: Visibility(
               visible: _isVisible,
               child: CustomElevatedButton(
-                text: "Optimize",
+                buttonTextStyle: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+                buttonStyle: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  side: const BorderSide(
+                    color: Color.fromARGB(255, 0, 128, 0),
+                    width: 0.2,
+                  ),
+                  iconColor: Colors.black,
+                ),
+                text: "Create Route",
                 onPressed: () {
                   routeCreationBloc.add(RoutePersisted());
                 },

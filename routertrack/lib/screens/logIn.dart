@@ -121,7 +121,7 @@ class _LogInScreenState extends State<LogInScreen> {
                           child: CustomImageView(
                             imagePath: _isObscured
                                 ? 'assets/images/img_eyeslash.svg'
-                                : 'assets/images/img_eyeslash.svg',
+                                : 'assets/images/eye-outline.svg',
                             height: 13,
                             width: 16,
                           ),

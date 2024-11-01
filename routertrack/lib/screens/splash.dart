@@ -48,7 +48,7 @@ class SplashScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 11),
+              const SizedBox(height: 25),
               CustomElevatedButton(
                 width: 261,
                 text: "Let’s Get Started",
@@ -58,6 +58,7 @@ class SplashScreen extends StatelessWidget {
                     imagePath: 'assets/images/img_arrowright.svg',
                     height: 20,
                     width: 20,
+                    color: Colors.black,
                   ),
                 ),
                 buttonTextStyle: theme.textTheme.bodyLarge,

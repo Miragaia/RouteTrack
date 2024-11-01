@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:routertrack/dto/route_with_points_dto.dart';
+import 'package:routertrack/mycolors/colors.dart';
 import 'package:routertrack/widgets/generated_qr_code_dialog.dart';
 
 class RouteTimeline extends StatefulWidget {
@@ -82,47 +83,56 @@ class _RouteTimelineState extends State<RouteTimeline> {
                 Padding(
                   padding: const EdgeInsets.only(
                     top: 39,
-                    left: 15,
-                    right: 15,
+                    left: 24,
+                    right: 24,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Title",
-                        style: TextStyle(
+                      Text(
+                        "Route ${index + 1}",
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: MyColorPalette.darkGreen,
                         ),
                       ),
                       Row(
                         children: [
-                          ElevatedButton.icon(
+                          ElevatedButton(
+                            onPressed: () => {},
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: MyColorPalette.forestGreen,
+                                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                minimumSize: const Size(40, 0)
+                            ),
+                            child: const Icon(Icons.download, color: Colors.white,),
+                          ),
+                          ElevatedButton(
                             onPressed: () => qrCodeDialogBuilder(
-                              context,
-                              jsonEncode(widget.routesWithPoints[index])
+                                context,
+                                jsonEncode(widget.routesWithPoints[index])
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              backgroundColor: MyColorPalette.forestGreen,
+                              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
+                              minimumSize: const Size(40, 0)
                             ),
-                            icon: const Icon(Icons.qr_code, color: Colors.white),
-                            label: const Text(
-                              "Share QR",
-                              style: TextStyle(fontSize: 14, color: Colors.white),
-                            ),
+                            child: const Icon(Icons.qr_code, color: Colors.white,),
                           ),
-                          SizedBox(width: 10,),
+                          const SizedBox(width: 4.5,),
                           ElevatedButton(
                             onPressed: () {
                               _sendDataToSmartwatch(widget.routesWithPoints[index]);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: MyColorPalette.forestGreen,
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -146,12 +156,16 @@ class _RouteTimelineState extends State<RouteTimeline> {
                     height: 30,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: stepState == StepState.complete ? Colors.green : Colors.grey,
+                      color: stepState == StepState.complete ? MyColorPalette.forestGreen : Colors.grey,
                     ),
                     child: Center(
-                      child: Text(
-                        'cenas',
-                        style: TextStyle(
+                      child: stepIndex == 0 ? const Icon(Icons.home, color: Colors.white, size: 16,) :
+                      stepIndex ==  widget.routesWithPoints[index].pointsOfInterest.length - 1 ?
+                      const Icon(Icons.flag, color: Colors.white, size: 16,) :
+                      Text(
+                        stepIndex.toString(),
+                        style: const TextStyle(
+                          fontSize: 16,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -174,7 +188,7 @@ class _RouteTimelineState extends State<RouteTimeline> {
                               overflow: TextOverflow.ellipsis,
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: MyColorPalette.forestGreen,
                             ),
                           ),
                           Text(

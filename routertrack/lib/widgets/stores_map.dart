@@ -1,15 +1,11 @@
 import 'package:routertrack/bloc/route_creation/route_creation_bloc.dart';
 import 'package:routertrack/bloc/route_creation/route_creation_state.dart';
-import 'package:routertrack/repository/route_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:routertrack/bloc/search_location_bloc.dart';
-import 'package:routertrack/widgets/route_bottom_sheet.dart';
-
 import '../dto/route_item_dto.dart';
 import '../location/determine_position.dart';
 
@@ -27,12 +23,7 @@ class _RoutesMapState extends State<RoutesMap> {
   Uuid uuid = const Uuid();
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   late GoogleMapController _googleMapController;
-  final ClusterManagerId clusterManagerId = const ClusterManagerId("stores");
-  late ClusterManager clusterManager;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  late SearchLocationBloc searchLocationBloc;
-  // Getting the following error
-  bool isButtonVisible = false;
   VoidCallback? followStoreLink;
 
   static const CameraPosition _kEurope = CameraPosition(
@@ -43,22 +34,6 @@ class _RoutesMapState extends State<RoutesMap> {
   @override
   void initState() {
     super.initState();
-    searchLocationBloc = BlocProvider.of<SearchLocationBloc>(context);
-    clusterManager = ClusterManager(
-      clusterManagerId: clusterManagerId,
-      onClusterTap: (Cluster cluster) async {
-        double zoom = await _googleMapController.getZoomLevel();
-        double newZoom = zoom < 11 ? 11 : zoom + 2;
-        debugPrint('Zoom: $zoom');
-        debugPrint('New Zoom: $newZoom');
-        searchLocationBloc.add(SearchLocationEvent(cluster.position));
-        // _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        //   bearing: 0,
-        //   target: cluster.position,
-        //   zoom: newZoom,
-        // )));
-      },
-    );
   }
 
   @override
@@ -99,12 +74,6 @@ class _RoutesMapState extends State<RoutesMap> {
           _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
             _bounds(markers.values.toSet()), 50
           ));
-
-          // _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-          //   bearing: 0,
-          //   target: routeItemLatLng,
-          //   zoom: 17.0,
-          // )));
         } else if (state is RouteStateCleared){
           markers = <MarkerId, Marker>{};
         }
@@ -135,27 +104,6 @@ class _RoutesMapState extends State<RoutesMap> {
                     myLocationButtonEnabled: false,
                     mapToolbarEnabled: false,
                     markers: Set<Marker>.of(markers.values),
-                    clusterManagers: <ClusterManager>{clusterManager},
-                    onTap: (LatLng latLng) {
-                      setState(() {
-                        isButtonVisible = false;
-                      });
-                    },
-                  ),
-                  AnimatedPositioned(
-                    right: isButtonVisible ? 10 : -100,
-                    bottom: 56,
-                    duration: const Duration(milliseconds: 500),
-                    child: IconButton.filled(
-                      onPressed: () => followStoreLink!(),
-                      icon: const Icon(Icons.shopping_bag_outlined,
-                        color: Colors.green,
-                        size: 20,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                      ),
-                    ),
                   ),
                   Positioned(
                     left: 12,
@@ -172,22 +120,21 @@ class _RoutesMapState extends State<RoutesMap> {
                     ),
                   ),
                   Positioned(
-                      right: 15,
-                      bottom: 100,
+                      right: 12,
+                      top: 40,
                       child: IconButton.filled(
                         onPressed: () {
                           if (snapshot.hasData){
                             Position? currentLocation = snapshot.data;
-                            // _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-                            //   bearing: 0,
-                            //   target: LatLng(currentLocation!.latitude, currentLocation.longitude),
-                            //   zoom: 17.0,
-                            // )));
-                            searchLocationBloc.add(SearchLocationEvent(LatLng(currentLocation!.latitude, currentLocation.longitude)));
+                            _googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                              bearing: 0,
+                              target: LatLng(currentLocation!.latitude, currentLocation.longitude),
+                              zoom: 17.0,
+                            )));
                           }
                         },
                         icon: const Icon(Icons.near_me_outlined,
-                          color: Colors.green,
+                          color: Colors.black,
                           size: 20,
                         ),
                         style: IconButton.styleFrom(
