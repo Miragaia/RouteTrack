@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'package:geolocator/geolocator.dart';
 
 import '../dto/route_item_dto.dart';
 import '../location/determine_position.dart';
