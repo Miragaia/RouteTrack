@@ -132,7 +132,6 @@ class _RoutesMapState extends State<RoutesMap> {
             backgroundColor: Color.fromARGB(255, 206, 32, 41)
           ));
         }else if (state is RouteStateCleared){
-          List<MarkerId> markerIdsToRemove = [];
           markers.removeWhere((markerId, marker) => !["Origin", "Destination"].contains(
               marker.infoWindow.title
           ));

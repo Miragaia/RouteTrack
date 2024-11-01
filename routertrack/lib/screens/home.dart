@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:routertrack/screens/map.dart';
 import 'package:routertrack/screens/route_screen.dart';
-import 'package:routertrack/widgets/routes_map.dart'; // Assuming StoresMap is your map screen
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
