@@ -11,7 +11,6 @@ import 'package:routertrack/widgets/qr_code_scanner_dialog.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
 import '../bloc/route_creation/route_creation_bloc.dart';
 import '../bloc/route_creation/route_creation_events.dart';
-import '../bloc/search_location_bloc.dart';
 import '../location/determine_position.dart';
 import 'CustomElevatedButton.dart';
 
@@ -27,7 +26,6 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
   final FocusNode _searchAddressFocusNode = FocusNode();
   final DraggableScrollableController _draggableScrollableSheetController = DraggableScrollableController();
   bool _isVisible = true;
-  late SearchLocationBloc searchLocationBloc;
   final List<bool> _selectedTransports = [true, false, false];
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
@@ -50,7 +48,6 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
         });
       }
     });
-    searchLocationBloc = BlocProvider.of<SearchLocationBloc>(context);
   }
 
 
@@ -141,10 +138,6 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                   longitude: double.parse(prediction.lng.toString()),
                                 )
                             ));
-
-                            searchLocationBloc.add(SearchLocationEvent(LatLng(
-                                double.parse(prediction.lat.toString()), double.parse(prediction.lng.toString())
-                            )));
                           },
 
                           itemClick: (Prediction prediction) {

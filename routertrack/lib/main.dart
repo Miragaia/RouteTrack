@@ -9,9 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'bloc/route_creation/route_creation_bloc.dart';
 import 'dto/route_item_dto.dart';
-import 'bloc/search_location_bloc.dart';
 import 'cubit/routes_cubit/routes_cubit.dart';
-import 'database/database.dart';
 import 'location/determine_position.dart';
 
 
@@ -55,12 +53,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
         BlocProvider(
-          create: (context) => SearchLocationBloc(const LatLng(0, 0)),
-        ),
-        BlocProvider(
           create: (context) => RoutesCubit(routePersistenceRepository),
         ),
-
       ],
       child: MaterialApp(
         title: 'RouterTrack',
