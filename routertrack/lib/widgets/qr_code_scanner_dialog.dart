@@ -73,14 +73,25 @@ class _QrViewDialogState extends State<QrViewDialog> {
           ),
         ),
         actions: <Widget>[
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).textTheme.labelLarge,
-            ),
-            child: const Text('Close'),
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 13
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              side: const BorderSide(
+                color: Color.fromARGB(255, 0, 128, 0),
+                width: 0.2,
+              ),
+              iconColor: Colors.black,
+            ),
+            child: const Text('Close', style: TextStyle(fontSize: 16, color: Colors.black)),
           ),
         ],
       ),
@@ -92,57 +103,5 @@ class _QrViewDialogState extends State<QrViewDialog> {
     controller.dispose();
     super.dispose();
   }
-}
-
-
-Future<void> qrCodeScannerBuilder(
-    BuildContext context,
-    GlobalKey qrKey,
-) {
-
-  // data -> jsonString
-  return showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return Expanded(
-        child: AlertDialog(
-          title: const Text('QR CODE SCANNER'),
-          content: FutureBuilder(
-            future: _getCameraPermission(),
-            builder: (BuildContext context, AsyncSnapshot<PermissionStatus> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError || !snapshot.data!.isGranted) {
-                return const Text("Error: Don't have the necessary camera permissions");
-              }
-              return QRView(
-                key: qrKey,
-                onQRViewCreated: (QRViewController controller){
-                  controller = qrKey.currentState as QRViewController;
-                  controller.resumeCamera();
-                  controller.scannedDataStream.listen((scanData) {
-                  });
-                },
-              );
-            },
-        
-        
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
 }
 

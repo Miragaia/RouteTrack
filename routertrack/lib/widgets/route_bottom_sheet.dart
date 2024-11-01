@@ -23,7 +23,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
   final FocusNode _searchAddressFocusNode = FocusNode();
   final DraggableScrollableController _draggableScrollableSheetController = DraggableScrollableController();
   bool _isVisible = true;
-  final List<bool> _selectedTransports = [true, false, false];
+  final List<bool> _selectedTransports = [false, false, true];
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
 
@@ -156,13 +156,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                         Row(
                           children: [
                             ToggleButtons(
-                              onPressed: (int index) {
-                                setState(() {
-                                  for (int i = 0; i < _selectedTransports.length; i++) {
-                                    _selectedTransports[i] = i == index;
-                                  }
-                                });
-                              },
+                              onPressed: (int index) { },
                               borderColor: MyColorPalette.darkGreen,
                               borderWidth: 0.2,
                               borderRadius: const BorderRadius.all(Radius.circular(8)),

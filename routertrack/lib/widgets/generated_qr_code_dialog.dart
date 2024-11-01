@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../mycolors/colors.dart';
+
 Future<void> qrCodeDialogBuilder(BuildContext context, String data) {
   // data -> jsonString
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('QR CODE'),
+        title: const Text('QR CODE', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: MyColorPalette.darkGreen)),
         content: ConstrainedBox(
           constraints: const BoxConstraints(
             minHeight: 200,
@@ -26,14 +28,25 @@ Future<void> qrCodeDialogBuilder(BuildContext context, String data) {
           ),
         ),
         actions: <Widget>[
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).textTheme.labelLarge,
-            ),
-            child: const Text('Close'),
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 13
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              side: const BorderSide(
+                color: Color.fromARGB(255, 0, 128, 0),
+                width: 0.2,
+              ),
+              iconColor: Colors.black,
+            ),
+            child: const Text('Close', style: TextStyle(fontSize: 16, color: Colors.black)),
           ),
         ],
       );
