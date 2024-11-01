@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
@@ -10,7 +9,6 @@ import 'package:routertrack/widgets/qr_code_scanner_dialog.dart';
 import 'package:routertrack/widgets/stepper_timeline.dart';
 import '../bloc/route_creation/route_creation_bloc.dart';
 import '../bloc/route_creation/route_creation_events.dart';
-import '../location/determine_position.dart';
 import 'CustomElevatedButton.dart';
 
 class RouteBottomSheet extends StatefulWidget {
@@ -94,21 +92,7 @@ class _RouteBottomSheetState extends State<RouteBottomSheet> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.my_location_outlined),
-                                    onPressed: () async {
-                                      Position position = await determinePosition();
-                                      routeCreationBloc.add(RouteEntryAdded(
-                                          routeItem: RouteItemDTO(
-                                            title: "Point",
-                                            description: "Your current location: ${position.latitude}, ${position.longitude}",
-                                            latitude: position.latitude,
-                                            longitude: position.longitude,
-                                          )
-                                      ));
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.qr_code),
+                                    icon: const Icon(Icons.qr_code),
                                     onPressed: () {
                                       showDialog(
                                         context: context,
