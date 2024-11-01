@@ -13,6 +13,10 @@ class RouteScreen extends StatelessWidget {
     
 
     return SafeArea(child: Scaffold(
+      appBar: AppBar(
+        title: const Text('Your Routes'),
+        forceMaterialTransparency: true,
+      ),
       body: Center(
         child: BlocBuilder<RoutesCubit, List<RouteWithPoints>>(
           builder: (context, state){

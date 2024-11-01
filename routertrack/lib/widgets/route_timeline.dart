@@ -75,170 +75,173 @@ class _RouteTimelineState extends State<RouteTimeline> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: widget.routesWithPoints.length,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 7.6, horizontal: 24),
-          clipBehavior: Clip.hardEdge,
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              splashFactory: NoSplash.splashFactory,
-              highlightColor: Colors.transparent,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 39,
-                    left: 24,
-                    right: 24,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Route ${index + 1}",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: MyColorPalette.darkGreen,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ListView.builder(
+        itemCount: widget.routesWithPoints.length,
+        itemBuilder: (context, index) {
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 7.6, horizontal: 24),
+            clipBehavior: Clip.hardEdge,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                splashFactory: NoSplash.splashFactory,
+                highlightColor: Colors.transparent,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 39,
+                      left: 24,
+                      right: 24,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Route ${index + 1}",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: MyColorPalette.darkGreen,
+                          ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              final pdf = await generateRoutePdf(
-                                routeName: "Route ${index + 1}",
-                                routeData: jsonEncode(widget.routesWithPoints[index]),
-                              );
-                              final output = await getDownloadsDirectory();
-                              final filename = "${output?.path}/route_${index+1}.pdf";
-                              final file = File(filename);
-                              await file.writeAsBytes(await pdf.save());
-                              await Notif.showDownloadNotification(
-                                fnp: flutterLocalNotificationsPlugin,
-                                routeName: "Route ${index + 1}",
-                                routeFilename: filename,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                final pdf = await generateRoutePdf(
+                                  routeName: "Route ${index + 1}",
+                                  routeData: jsonEncode(widget.routesWithPoints[index]),
+                                );
+                                final output = await getDownloadsDirectory();
+                                final filename = "${output?.path}/route_${index+1}.pdf";
+                                final file = File(filename);
+                                await file.writeAsBytes(await pdf.save());
+                                await Notif.showDownloadNotification(
+                                  fnp: flutterLocalNotificationsPlugin,
+                                  routeName: "Route ${index + 1}",
+                                  routeFilename: filename,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: MyColorPalette.forestGreen,
+                                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  minimumSize: const Size(40, 0)
+                              ),
+                              child: const Icon(Icons.download, color: Colors.white),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => qrCodeDialogBuilder(
+                                  context,
+                                  jsonEncode(widget.routesWithPoints[index])
+                              ),
+                              style: ElevatedButton.styleFrom(
                                 backgroundColor: MyColorPalette.forestGreen,
                                 padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 minimumSize: const Size(40, 0)
-                            ),
-                            child: const Icon(Icons.download, color: Colors.white),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => qrCodeDialogBuilder(
-                                context,
-                                jsonEncode(widget.routesWithPoints[index])
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: MyColorPalette.forestGreen,
-                              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
                               ),
-                              minimumSize: const Size(40, 0)
+                              child: const Icon(Icons.qr_code, color: Colors.white,),
                             ),
-                            child: const Icon(Icons.qr_code, color: Colors.white,),
-                          ),
-                          const SizedBox(width: 4.5,),
-                          ElevatedButton(
-                            onPressed: () {
-                              _sendDataToSmartwatch(widget.routesWithPoints[index]);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: MyColorPalette.forestGreen,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                            const SizedBox(width: 4.5,),
+                            ElevatedButton(
+                              onPressed: () {
+                                _sendDataToSmartwatch(widget.routesWithPoints[index]);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: MyColorPalette.forestGreen,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                "Send Data",
+                                style: TextStyle(fontSize: 14, color: Colors.white),
                               ),
                             ),
-                            child: const Text(
-                              "Send Data",
-                              style: TextStyle(fontSize: 14, color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                Stepper(
-                  physics: const NeverScrollableScrollPhysics(),
-                  key: Key(Random.secure().nextDouble().toString()), // needs to be constant to be clicked
-                  stepIconBuilder: (stepIndex, stepState) => Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: stepState == StepState.complete ? MyColorPalette.forestGreen : Colors.grey,
+                          ],
+                        )
+                      ],
                     ),
-                    child: Center(
-                      child: stepIndex == 0 ? const Icon(Icons.home, color: Colors.white, size: 16,) :
-                      stepIndex ==  widget.routesWithPoints[index].pointsOfInterest.length - 1 ?
-                      const Icon(Icons.flag, color: Colors.white, size: 16,) :
-                      Text(
-                        stepIndex.toString(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                  ),
+                  Stepper(
+                    physics: const NeverScrollableScrollPhysics(),
+                    key: Key(Random.secure().nextDouble().toString()), // needs to be constant to be clicked
+                    stepIconBuilder: (stepIndex, stepState) => Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: stepState == StepState.complete ? MyColorPalette.forestGreen : Colors.grey,
+                      ),
+                      child: Center(
+                        child: stepIndex == 0 ? const Icon(Icons.home, color: Colors.white, size: 16,) :
+                        stepIndex ==  widget.routesWithPoints[index].pointsOfInterest.length - 1 ?
+                        const Icon(Icons.flag, color: Colors.white, size: 16,) :
+                        Text(
+                          stepIndex.toString(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  currentStep: widget.routesWithPoints[index].pointsOfInterest.length - 1,
-                  type: StepperType.vertical, // Make it vertical like a timeline
-                  onStepTapped: (int index){},
-                  steps: widget.routesWithPoints[index].pointsOfInterest.indexed.map((item) {
-                    final (index, entry) = item;
+                    currentStep: widget.routesWithPoints[index].pointsOfInterest.length - 1,
+                    type: StepperType.vertical, // Make it vertical like a timeline
+                    onStepTapped: (int index){},
+                    steps: widget.routesWithPoints[index].pointsOfInterest.indexed.map((item) {
+                      final (index, entry) = item;
 
-                    return Step(
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.title,
-                            style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: MyColorPalette.forestGreen,
+                      return Step(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.title,
+                              style: TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: MyColorPalette.forestGreen,
+                              ),
                             ),
-                          ),
-                          Text(
-                            entry.description,
-                            style: TextStyle(
-                              height: 1.2,
-                              color: Color.fromARGB(255, 112, 112, 112),
-                              fontSize: 11.5,
+                            Text(
+                              entry.description,
+                              style: TextStyle(
+                                height: 1.2,
+                                color: Color.fromARGB(255, 112, 112, 112),
+                                fontSize: 11.5,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      content: const SizedBox.shrink(),
-                      isActive: true,
-                      state: StepState.complete,
-                    );
-                  }).toList(),
-                  controlsBuilder: (BuildContext context, ControlsDetails controls) {
-                    // Remove default buttons to mimic timeline
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
+                          ],
+                        ),
+                        content: const SizedBox.shrink(),
+                        isActive: true,
+                        state: StepState.complete,
+                      );
+                    }).toList(),
+                    controlsBuilder: (BuildContext context, ControlsDetails controls) {
+                      // Remove default buttons to mimic timeline
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      }
+          );
+        }
+      ),
     );
   }
 }

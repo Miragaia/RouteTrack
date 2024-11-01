@@ -22,23 +22,13 @@ class PointsOfInterestRoutesEntries extends Table {
   IntColumn get routeId => integer().references(Routes, #id)();
 }
 
-class Trips extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  DateTimeColumn get creationDate => dateTime().withDefault(Constant(DateTime.now()))();
-  // Foreign Keys
-  // Route -- 1xN -- Trips
-  // User -- 1xN -- Trips
-  IntColumn get routeId => integer().references(Routes, #id)();
-  IntColumn get userId => integer().references(Users, #id)();
-}
-
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
 }
 
 
 @DriftDatabase(
-  tables: [PointsOfInterests, Routes, PointsOfInterestRoutesEntries, Trips, Users],
+  tables: [PointsOfInterests, Routes, PointsOfInterestRoutesEntries, Users],
 )
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a schemaVersion getter
@@ -54,14 +44,6 @@ class AppDatabase extends _$AppDatabase {
     // getApplicationDocumentsDirectory().
     return driftDatabase(name: 'my_database');
   }
-
-  Stream<List<Trip>> usersTrips(Users user) {
-    return (
-        select(trips)
-          ..where((trip) => trip.userId.equals(user.id as int))
-    ).watch();
-  }
-
 
 }
 
