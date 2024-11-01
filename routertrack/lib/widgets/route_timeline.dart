@@ -11,6 +11,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:routertrack/dto/route_with_points_dto.dart';
 import 'package:routertrack/mycolors/colors.dart';
+import 'package:routertrack/pdf_generator/route_pdf.dart';
 import 'package:routertrack/widgets/generated_qr_code_dialog.dart';
 import '../notifications/notification.dart';
 
@@ -112,19 +113,10 @@ class _RouteTimelineState extends State<RouteTimeline> {
                         children: [
                           ElevatedButton(
                             onPressed: () async {
-                              final font = await PdfGoogleFonts.nunitoExtraLight();
-                              final pdf = pw.Document();
-                              pdf.addPage(pw.Page(
-                                pageFormat: PdfPageFormat.a4,
-                                build: (pw.Context context) {
-                                  return pw.Center(
-                                    child: pw.Text(
-                                      "Hello World",
-                                      style: pw.TextStyle(font: font, fontSize: 40)
-                                    ),
-                                  ); // Center
-                                }
-                              ));
+                              final pdf = await generateRoutePdf(
+                                routeName: "Route ${index + 1}",
+                                routeData: jsonEncode(widget.routesWithPoints[index]),
+                              );
                               final output = await getDownloadsDirectory();
                               final filename = "${output?.path}/route_${index+1}.pdf";
                               final file = File(filename);
