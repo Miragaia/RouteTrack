@@ -94,43 +94,38 @@ class _RoutesMapState extends State<RoutesMap> {
       },
       listener: (context, state) async {
         if (state is RouteStateCreated){
-          if (state.lastAddedEntry == state.routeItemEntries.last){
-            _initRoute(state);
-          } else {
-            RouteItemDTO routeItemDTO = state.lastAddedEntry.routeItem;
-            LatLng routeItemLatLng = LatLng(routeItemDTO.latitude, routeItemDTO.longitude);
-            MarkerId markerId = MarkerId(uuid.v4());
-            markers[markerId] = Marker(
-              markerId: markerId,
-              position: routeItemLatLng,
-              icon: BitmapDescriptor.defaultMarker,
-              infoWindow: InfoWindow(
-                title: routeItemDTO.title,
-                snippet: routeItemDTO.description,
-              ),
+          RouteItemDTO routeItemDTO = state.lastAddedEntry.routeItem;
+          LatLng routeItemLatLng = LatLng(routeItemDTO.latitude, routeItemDTO.longitude);
+          MarkerId markerId = MarkerId(uuid.v4());
+          markers[markerId] = Marker(
+            markerId: markerId,
+            position: routeItemLatLng,
+            icon: BitmapDescriptor.defaultMarker,
+            infoWindow: InfoWindow(
+              title: routeItemDTO.title,
+              snippet: routeItemDTO.description,
+            ),
+          );
+          LatLngBounds _createBounds(List<LatLng> positions) {
+            final southwestLat = positions.map((p) => p.latitude).reduce((value, element) => value < element ? value : element); // smallest
+            final southwestLon = positions.map((p) => p.longitude).reduce((value, element) => value < element ? value : element);
+            final northeastLat = positions.map((p) => p.latitude).reduce((value, element) => value > element ? value : element); // biggest
+            final northeastLon = positions.map((p) => p.longitude).reduce((value, element) => value > element ? value : element);
+            final latRange = northeastLat - southwestLat;
+            return LatLngBounds(
+                southwest: LatLng(southwestLat - latRange, southwestLon),
+                northeast: LatLng(northeastLat, northeastLon)
             );
-            LatLngBounds _createBounds(List<LatLng> positions) {
-              final southwestLat = positions.map((p) => p.latitude).reduce((value, element) => value < element ? value : element); // smallest
-              final southwestLon = positions.map((p) => p.longitude).reduce((value, element) => value < element ? value : element);
-              final northeastLat = positions.map((p) => p.latitude).reduce((value, element) => value > element ? value : element); // biggest
-              final northeastLon = positions.map((p) => p.longitude).reduce((value, element) => value > element ? value : element);
-              final latRange = northeastLat - southwestLat;
-              return LatLngBounds(
-                  southwest: LatLng(southwestLat - latRange, southwestLon),
-                  northeast: LatLng(northeastLat, northeastLon)
-              );
-            }
-            LatLngBounds _bounds(Set<Marker> markers) {
-              return _createBounds(markers.map((m) => m.position).toList());
-            }
-            markers = Map<MarkerId, Marker>.from(markers);
-            _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
-                _bounds(markers.values.toSet()), 50
-            ));
-            setState(() {});
-            await _drawRoute(state);
           }
-
+          LatLngBounds _bounds(Set<Marker> markers) {
+            return _createBounds(markers.map((m) => m.position).toList());
+          }
+          markers = Map<MarkerId, Marker>.from(markers);
+          _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
+            _bounds(markers.values.toSet()), 50
+          ));
+          setState(() {});
+          await _drawRoute(state);
         } else if (state is RouteStateRepeated){
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Cannot add repeated route point!"),
